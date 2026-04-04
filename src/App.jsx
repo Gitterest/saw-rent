@@ -1,3 +1,580 @@
+import React, { useEffect, useMemo, useState } from "react"
+import { setBookingStatus as applyBookingStatusTransition } from "./domain/bookingTransitions"
+import { updateOrCreateCustomer } from "./domain/customers"
+import { addMaintenanceItem as createMaintenanceItem, markMaintenanceDone as applyMaintenanceDone } from "./domain/maintenance"
+
+const STORAGE_KEY = "saw-rent-v2"
+const DEFAULT_PIN = "1234"
+
+const uid = (prefix) => `${prefix}-${Math.random().toString(36).slice(2, 10)}`;
+const money = (n) => `$${Number(n || 0).toFixed(2)}`;
+const today = () => new Date().toISOString().slice(0, 10);
+const tomorrow = () => {
+const d = new Date();
+d.setDate(d.getDate() + 1);
+return d.toISOString().slice(0, 10);
+};
+
+function createSeedData() {
+const saws = [
+{
+id: uid("saw"),
+name: "Husqvarna 51",
+category: "Mid-Size",
+barSize: '18"',
+fuel: "50:1 Mix",
+deposit: 175,
+rate2h: 25,
+rate4h: 35,
+rateDay: 55,
+weekend: 90,
+week: 180,
+status: "Available",
+condition: "Ready",
+notes: "Solid general-use rental saw.",
+},
+{
+id: uid("saw"),
+name: "Husqvarna 350",
+category: "Mid-Size",
+barSize: '18"',
+fuel: "50:1 Mix",
+deposit: 175,
+rate2h: 25,
+rate4h: 35,
+rateDay: 55,
+weekend: 90,
+week: 180,
+status: "Available",
+condition: "Ready",
+notes: "Fast-moving everyday rental option.",
+},
+{
+id: uid("saw"),
+name: "Husqvarna 141",
+category: "Light Duty",
+barSize: '16"',
+fuel: "50:1 Mix",
+deposit: 125,
+rate2h: 20,
+rate4h: 30,
+rateDay: 45,
+weekend: 75,
+week: 150,
+status: "Available",
+condition: "Ready",
+notes: "Best for lighter cutting jobs.",
+},
+{
+id: uid("saw"),
+name: "Husqvarna 23 Compact",
+category: "Compact",
+barSize: '14"',
+fuel: "50:1 Mix",
+deposit: 100,
+rate2h: 20,
+rate4h: 25,
+rateDay: 40,
+weekend: 70,
+week: 135,
+status: "Available",
+condition: "Ready",
+notes: "Compact saw for smaller jobs.",
+},
+{
+id: uid("saw"),
+name: "McCulloch Pro Mac 610",
+category: "Large / Vintage",
+barSize: '20"',
+fuel: "50:1 Mix",
+deposit: 225,
+rate2h: 35,
+rate4h: 45,
+rateDay: 70,
+weekend: 115,
+week: 230,
+status: "Available",
+condition: "Ready",
+notes: "Heavier saw. Better for larger cuts and experienced users.",
+},
+{
+id: uid("saw"),
+name: "Poulan Wild Thing",
+category: "Budget",
+barSize: '18"',
+fuel: "50:1 Mix",
+deposit: 100,
+rate2h: 20,
+rate4h: 30,
+rateDay: 45,
+weekend: 75,
+week: 150,
+status: "Available",
+condition: "Ready",
+notes: "Budget rental option for light to medium work.",
+},
+];
+
+return {
+settings: {
+businessName: "Saw Rent",
+phone: "219-851-9675",
+location: "136 Grand Ave, La Porte, IN 46350",
+requestModeOnly: true,
+adminPin: DEFAULT_PIN,
+},
+saws,
+customers: [
+{
+id: uid("cust"),
+name: "Mike Dawson",
+phone: "(219) 555-0188",
+notes: "Repeat renter",
+rentals: 2,
+totalSpent: 130,
+},
+],
+bookings: [
+{
+id: uid("book"),
+sawId: saws[1].id,
+sawName: saws[1].name,
+customerId: null,
+customerName: "John Carter",
+phone: "(219) 555-0142",
+channel: "App Request",
+startDate: tomorrow(),
+endDate: tomorrow(),
+duration: "1 day",
+rentalPrice: saws[1].rateDay,
+deposit: saws[1].deposit,
+status: "Pending",
+notes: "Storm cleanup request.",
+createdAt: new Date().toISOString(),
+},
+],
+maintenance: [
+{
+id: uid("mnt"),
+sawId: saws[4].id,
+sawName: saws[4].name,
+issue: "Inspect chain brake before next rental",
+priority: "High",
+status: "Open",
+lastService: today(),
+notes: "Do not release until checked.",
+},
+],
+};
+}
+
+function loadState() {
+try {
+const raw = localStorage.getItem(STORAGE_KEY);
+if (!raw) return createSeedData();
+const parsed = JSON.parse(raw);
+return parsed;
+} catch {
+return createSeedData();
+}
+}
+
+function saveState(state) {
+localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+}
+
+function getDurationPrice(saw, duration) {
+if (!saw) return 0;
+if (duration === "2 hours") return Number(saw.rate2h);
+if (duration === "4 hours") return Number(saw.rate4h);
+if (duration === "Weekend") return Number(saw.weekend);
+if (duration === "1 week") return Number(saw.week);
+return Number(saw.rateDay);
+}
+
+function getQuickPrice(saw, durationKey) {
+if (!saw) return 0;
+if (durationKey === "2h") return Number(saw.rate2h);
+if (durationKey === "4h") return Number(saw.rate4h);
+if (durationKey === "weekend") return Number(saw.weekend);
+if (durationKey === "week") return Number(saw.week);
+return Number(saw.rateDay);
+}
+
+function getStatusClass(status) {
+if (status === "Available" || status === "Done") return "badge green"
+if (status === "Pending" || status === "Scheduled") return "badge amber"
+if (status === "Out") return "badge blue"
+if (status === "Approved" || status === "Returned") return "badge slate"
+if (status === "Maintenance" || status === "Open" || status === "Declined") return "badge red"
+return "badge slate"
+}
+
+export default function SawRentApp() {
+const [app, setApp] = useState(createSeedData());
+const [booted, setBooted] = useState(false);
+const [adminOpen, setAdminOpen] = useState(false);
+const [adminUnlocked, setAdminUnlocked] = useState(false);
+const [pin, setPin] = useState("");
+const [publicSearch, setPublicSearch] = useState("");
+const [inventorySearch, setInventorySearch] = useState("");
+const [inventoryFilter, setInventoryFilter] = useState("all");
+const [bookingFilter, setBookingFilter] = useState("all");
+const [selectedDuration, setSelectedDuration] = useState("day");
+const [selectedSawId, setSelectedSawId] = useState("");
+const [adminTab, setAdminTab] = useState("overview");
+const [publicRequest, setPublicRequest] = useState({
+name: "",
+phone: "",
+sawId: "",
+startDate: tomorrow(),
+duration: "1 day",
+notes: "",
+});
+const [newSaw, setNewSaw] = useState({
+name: "",
+category: "Homeowner",
+barSize: '18"',
+fuel: "50:1 Mix",
+deposit: 150,
+rate2h: 25,
+rate4h: 35,
+rateDay: 55,
+weekend: 90,
+week: 180,
+condition: "Ready",
+notes: "",
+});
+const [newBooking, setNewBooking] = useState({
+customerName: "",
+phone: "",
+channel: "Phone",
+sawId: "",
+startDate: today(),
+endDate: tomorrow(),
+duration: "1 day",
+notes: "",
+});
+const [maintenanceDraft, setMaintenanceDraft] = useState({
+sawId: "",
+issue: "",
+priority: "Medium",
+notes: "",
+});
+
+useEffect(() => {
+const state = loadState();
+setApp(state);
+setSelectedSawId(state.saws[0]?.id || "");
+setPublicRequest((prev) => ({ ...prev, sawId: state.saws[0]?.id || "" }));
+setNewBooking((prev) => ({ ...prev, sawId: state.saws[0]?.id || "" }));
+setMaintenanceDraft((prev) => ({ ...prev, sawId: state.saws[0]?.id || "" }));
+setBooted(true);
+}, []);
+
+useEffect(() => {
+if (!booted) return;
+saveState(app);
+}, [app, booted]);
+
+const availablePublicSaws = useMemo(() => {
+const q = publicSearch.trim().toLowerCase();
+return app.saws.filter((saw) => {
+const matchesStatus = saw.status === "Available"
+const matchesSearch =
+!q ||
+[saw.name, saw.category, saw.barSize, saw.condition, saw.notes]
+.join(" ")
+.toLowerCase()
+.includes(q);
+return matchesStatus && matchesSearch;
+});
+}, [app.saws, publicSearch]);
+
+const filteredInventory = useMemo(() => {
+const q = inventorySearch.trim().toLowerCase();
+return app.saws.filter((saw) => {
+const matchesText =
+!q ||
+[saw.name, saw.category, saw.barSize, saw.status, saw.condition, saw.notes]
+.join(" ")
+.toLowerCase()
+.includes(q);
+const matchesFilter = inventoryFilter === "all" || saw.status === inventoryFilter;
+return matchesText && matchesFilter;
+});
+}, [app.saws, inventorySearch, inventoryFilter]);
+
+const filteredBookings = useMemo(() => {
+return app.bookings.filter((booking) => bookingFilter === "all" || booking.status === bookingFilter);
+}, [app.bookings, bookingFilter]);
+
+const quickQuoteSaw = useMemo(() => {
+return app.saws.find((saw) => saw.id === selectedSawId) || app.saws[0] || null;
+}, [app.saws, selectedSawId]);
+
+const stats = useMemo(() => {
+const available = app.saws.filter((saw) => saw.status === "Available").length;
+const pending = app.bookings.filter((booking) => booking.status === "Pending").length;
+const out = app.bookings.filter((booking) => booking.status === "Out").length;
+const maintenanceOpen = app.maintenance.filter((item) => item.status !== "Done").length;
+const depositsHeld = app.bookings
+.filter((booking) => ["Pending", "Approved", "Out"].includes(booking.status))
+.reduce((sum, booking) => sum + Number(booking.deposit || 0), 0);
+return { available, pending, out, maintenanceOpen, depositsHeld };
+}, [app]);
+
+function resetAllData() {
+const fresh = createSeedData();
+setApp(fresh);
+setSelectedSawId(fresh.saws[0]?.id || "");
+setPublicRequest({ name: "", phone: "", sawId: fresh.saws[0]?.id || "", startDate: tomorrow(), duration: "1 day", notes: "" });
+setNewBooking({ customerName: "", phone: "", channel: "Phone", sawId: fresh.saws[0]?.id || "", startDate: today(), endDate: tomorrow(), duration: "1 day", notes: "" });
+setMaintenanceDraft({ sawId: fresh.saws[0]?.id || "", issue: "", priority: "Medium", notes: "" });
+localStorage.removeItem(STORAGE_KEY);
+}
+
+function handleAdminUnlock() {
+if (pin === app.settings.adminPin) {
+setAdminUnlocked(true);
+return;
+}
+window.alert("Wrong PIN.");
+}
+
+function handleAdminLock() {
+setAdminUnlocked(false);
+setAdminOpen(false);
+setPin("");
+setAdminTab("overview");
+}
+
+function submitPublicRequest(e) {
+e.preventDefault();
+const saw = app.saws.find((item) => item.id === publicRequest.sawId);
+if (!saw) {
+window.alert("Choose a saw first.");
+return;
+}
+if (saw.status !== "Available") {
+window.alert("That saw is no longer available.");
+return;
+}
+
+setApp((prev) => {
+const customerResult = updateOrCreateCustomer({
+customers: prev.customers,
+name: publicRequest.name.trim(),
+phone: publicRequest.phone.trim(),
+notes: publicRequest.notes.trim(),
+rentalIncrease: 0,
+spendIncrease: 0,
+createId: uid,
+});
+
+const booking = {
+id: uid("book"),
+sawId: saw.id,
+sawName: saw.name,
+customerId: customerResult.customerId,
+customerName: publicRequest.name.trim(),
+phone: publicRequest.phone.trim(),
+channel: "App Request",
+startDate: publicRequest.startDate,
+endDate: publicRequest.startDate,
+duration: publicRequest.duration,
+rentalPrice: getDurationPrice(saw, publicRequest.duration),
+deposit: saw.deposit,
+status: "Pending",
+notes: publicRequest.notes.trim(),
+createdAt: new Date().toISOString(),
+};
+
+return {
+...prev,
+customers: customerResult.customers,
+bookings: [booking, ...prev.bookings],
+saws: prev.saws.map((item) =>
+item.id === saw.id ? { ...item, status: "Out" } : item
+),
+};
+});
+
+setPublicRequest({
+name: "",
+phone: "",
+sawId: app.saws[0]?.id || "",
+startDate: tomorrow(),
+duration: "1 day",
+notes: "",
+});
+window.alert("Request submitted. Review it in Bookings.");
+}
+
+function addSaw(e) {
+e.preventDefault();
+if (!newSaw.name.trim()) {
+window.alert("Saw name is required.");
+return;
+}
+
+const saw = {
+id: uid("saw"),
+name: newSaw.name.trim(),
+category: newSaw.category.trim(),
+barSize: newSaw.barSize.trim(),
+fuel: newSaw.fuel.trim(),
+deposit: Number(newSaw.deposit),
+rate2h: Number(newSaw.rate2h),
+rate4h: Number(newSaw.rate4h),
+rateDay: Number(newSaw.rateDay),
+weekend: Number(newSaw.weekend),
+week: Number(newSaw.week),
+status: "Available",
+condition: newSaw.condition.trim(),
+notes: newSaw.notes.trim(),
+};
+
+setApp((prev) => ({
+...prev,
+saws: [saw, ...prev.saws],
+}));
+
+setNewSaw({
+name: "",
+category: "Homeowner",
+barSize: '18"',
+fuel: "50:1 Mix",
+deposit: 150,
+rate2h: 25,
+rate4h: 35,
+rateDay: 55,
+weekend: 90,
+week: 180,
+condition: "Ready",
+notes: "",
+});
+}
+
+function createManualBooking(e) {
+e.preventDefault();
+const saw = app.saws.find((item) => item.id === newBooking.sawId);
+if (!saw) {
+window.alert("Choose a saw first.");
+return;
+}
+if (saw.status !== "Available") {
+window.alert("That saw is not available.");
+return;
+}
+if (!newBooking.customerName.trim() || !newBooking.phone.trim()) {
+window.alert("Customer name and phone are required.");
+return;
+}
+
+setApp((prev) => {
+const customerResult = updateOrCreateCustomer({
+customers: prev.customers,
+name: newBooking.customerName.trim(),
+phone: newBooking.phone.trim(),
+notes: newBooking.notes.trim(),
+rentalIncrease: 1,
+spendIncrease: getDurationPrice(saw, newBooking.duration),
+createId: uid,
+});
+
+const booking = {
+id: uid("book"),
+sawId: saw.id,
+sawName: saw.name,
+customerId: customerResult.customerId,
+customerName: newBooking.customerName.trim(),
+phone: newBooking.phone.trim(),
+channel: newBooking.channel,
+startDate: newBooking.startDate,
+endDate: newBooking.endDate,
+duration: newBooking.duration,
+rentalPrice: getDurationPrice(saw, newBooking.duration),
+deposit: saw.deposit,
+status: "Out",
+notes: newBooking.notes.trim(),
+createdAt: new Date().toISOString(),
+};
+
+return {
+...prev,
+customers: customerResult.customers,
+bookings: [booking, ...prev.bookings],
+saws: prev.saws.map((item) =>
+item.id === saw.id ? { ...item, status: "Out" } : item
+),
+};
+});
+
+setNewBooking({
+customerName: "",
+phone: "",
+channel: "Phone",
+sawId: app.saws[0]?.id || "",
+startDate: today(),
+endDate: tomorrow(),
+duration: "1 day",
+notes: "",
+});
+}
+
+function setBookingStatus(bookingId, nextStatus) {
+setApp((prev) => {
+const next = applyBookingStatusTransition({
+bookings: prev.bookings,
+saws: prev.saws,
+customers: prev.customers,
+bookingId,
+nextStatus,
+});
+
+if (!next) return prev;
+return { ...prev, ...next };
+});
+}
+
+function addMaintenanceItem(e) {
+e.preventDefault();
+const saw = app.saws.find((item) => item.id === maintenanceDraft.sawId);
+if (!saw) {
+window.alert("Choose a saw first.");
+return;
+}
+if (!maintenanceDraft.issue.trim()) {
+window.alert("Maintenance issue is required.");
+return;
+}
+
+setApp((prev) => {
+const next = createMaintenanceItem({
+maintenance: prev.maintenance,
+saws: prev.saws,
+draft: maintenanceDraft,
+saw,
+createId: uid,
+date: today(),
+});
+return { ...prev, ...next };
+});
+
+setMaintenanceDraft({ sawId: app.saws[0]?.id || "", issue: "", priority: "Medium", notes: "" });
+}
+
+function markMaintenanceDone(id) {
+setApp((prev) => {
+const next = applyMaintenanceDone({
+maintenance: prev.maintenance,
+saws: prev.saws,
+bookings: prev.bookings,
+maintenanceId: id,
+});
+if (!next) return prev;
+return { ...prev, ...next };
 import React from "react";
 import { PublicRequestPanel } from "./features/public/PublicRequestPanel";
 import { AdminShell } from "./features/admin/AdminShell";
