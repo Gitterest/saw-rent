@@ -5,13 +5,14 @@ Saw Rent is a chainsaw rental web app built with React and Vite.
 ## Overview
 
 This app is designed to support a real rental workflow with:
-- public renter-facing booking/request flow
-- admin-only management area
-- inventory tracking
-- booking management
-- customer tracking
-- maintenance status tracking
-- local persistence for app data
+
+- Public renter-facing booking/request flow
+- Admin-only management area
+- Inventory tracking
+- Booking management
+- Customer tracking
+- Maintenance status tracking
+- Local persistence for app data
 
 ## Tech Stack
 
@@ -25,12 +26,16 @@ This app is designed to support a real rental workflow with:
 ```bash
 npm install
 npm run dev
+```
 
+## Build
 
-
-Build
+```bash
 npm run build
+```
 
-Lint
+## Lint
+
+```bash
 npm run lint
-
+```
