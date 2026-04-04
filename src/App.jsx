@@ -12,6 +12,48 @@ export default function SawRentApp() {
     return <div style={{ padding: 24, fontFamily: "Arial, sans-serif" }}>Loading...</div>;
   }
 
+const sawStillBooked = hasBlockingBooking(prev.bookings, item.sawId, null);
+
+return {
+...prev,
+maintenance: prev.maintenance.map((entry) =>
+entry.id === id ? { ...entry, status: "Done" } : entry
+),
+saws: prev.saws.map((saw) =>
+saw.id === item.sawId
+? { ...saw, status: sawStillBooked ? "Out" : "Available", condition: "Ready" }
+: saw
+),
+};
+});
+}
+
+function updateSetting(field, value) {
+setApp((prev) => ({
+...prev,
+settings: {
+...prev.settings,
+[field]: value,
+},
+}));
+}
+
+if (!booted) {
+return <div style={{ padding: 24, fontFamily: "Arial, sans-serif" }}>Loading...</div>
+}
+
+const sidebarItems = [
+{ key: "overview", label: "Overview", icon: "📊" },
+{ key: "inventory", label: "Inventory", icon: "🪚" },
+{ key: "bookings", label: "Bookings", icon: "📋" },
+{ key: "customers", label: "Customers", icon: "👤" },
+{ key: "maintenance", label: "Maintenance", icon: "🛠️" },
+{ key: "settings", label: "Settings", icon: "⚙️" },
+];
+
+return (
+<div className="app-shell">
+
   return (
     <div className="app-shell">
       <style>{`
