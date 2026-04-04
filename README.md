@@ -1,16 +1,61 @@
-# React + Vite
+# Saw Rent
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Production-oriented full-stack rental system for chainsaw inventory, booking intake, and owner administration.
 
-Currently, two official plugins are available:
+## Stack
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- Frontend: React + Vite
+- Backend API: Node + Express
+- Persistence: JSON file at `data/store.json`
+- Auth: owner password from env + signed `HttpOnly` session cookie
 
-## React Compiler
+## Environment Setup
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+Create `.env` (or export variables in your shell):
 
-## Expanding the ESLint configuration
+```bash
+OWNER_PASSWORD=replace-with-strong-password
+SESSION_SECRET=replace-with-long-random-secret
+PORT=4000
+```
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+## Run Locally
+
+```bash
+npm install
+npm run dev
+```
+
+- Public site: `http://localhost:5173/`
+- Admin console: `http://localhost:5173/admin`
+- API: `http://localhost:4000/api/health`
+
+## Admin API Security
+
+- `POST /api/admin/login` verifies `OWNER_PASSWORD`.
+- Server issues a signed, tamper-resistant cookie session.
+- All `/api/admin/*` routes require valid session middleware.
+
+## Data Model
+
+Persisted entities in `data/store.json`:
+
+- `inventory`
+- `bookings`
+- `customers`
+- `settings`
+
+## Booking and Availability Rules
+
+- Public requests create `requested` bookings.
+- Only `requested/approved/checked_out` block date overlap.
+- Maintenance lock prevents approval and public booking requests.
+- Lifecycle statuses: `requested -> approved -> checked_out -> returned -> closed` (+ `cancelled`).
+- Closing a booking updates or creates the related customer record.
+
+## Quality Checks
+
+```bash
+npm run lint
+npm run build
+```
