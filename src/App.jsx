@@ -1,4 +1,7 @@
 import React, { useEffect, useMemo, useState } from "react"
+import { setBookingStatus as applyBookingStatusTransition } from "./domain/bookingTransitions"
+import { updateOrCreateCustomer } from "./domain/customers"
+import { addMaintenanceItem as createMaintenanceItem, markMaintenanceDone as applyMaintenanceDone } from "./domain/maintenance"
 
 const STORAGE_KEY = "saw-rent-v2"
 const DEFAULT_PIN = "1234"
@@ -207,49 +210,6 @@ if (status === "Maintenance" || status === "Open" || status === "Declined") retu
 return "badge slate"
 }
 
-function hasBlockingBooking(bookings, sawId, excludeBookingId = null) {
-return bookings.some(
-(booking) =>
-booking.sawId === sawId &&
-booking.id !== excludeBookingId &&
-["Pending", "Approved", "Out"].includes(booking.status)
-);
-}
-
-function updateOrCreateCustomer(customers, name, phone, notes, rentalIncrease = 0, spendIncrease = 0) {
-const normalizedName = name.trim().toLowerCase();
-const index = customers.findIndex(
-(customer) => customer.phone === phone || customer.name.trim().toLowerCase() === normalizedName
-);
-
-if (index >= 0) {
-const existing = customers[index];
-const updated = {
-...existing,
-notes: notes || existing.notes,
-rentals: Number(existing.rentals || 0) + rentalIncrease,
-totalSpent: Number(existing.totalSpent || 0) + spendIncrease,
-};
-const nextCustomers = [...customers];
-nextCustomers[index] = updated;
-return { customerId: existing.id, customers: nextCustomers };
-}
-
-const newCustomer = {
-id: uid("cust"),
-name,
-phone,
-notes,
-rentals: rentalIncrease,
-totalSpent: spendIncrease,
-};
-
-return {
-customerId: newCustomer.id,
-customers: [newCustomer, ...customers],
-};
-}
-
 export default function SawRentApp() {
 const [app, setApp] = useState(createSeedData());
 const [booted, setBooted] = useState(false);
@@ -402,14 +362,15 @@ return;
 }
 
 setApp((prev) => {
-const customerResult = updateOrCreateCustomer(
-prev.customers,
-publicRequest.name.trim(),
-publicRequest.phone.trim(),
-publicRequest.notes.trim(),
-0,
-0
-);
+const customerResult = updateOrCreateCustomer({
+customers: prev.customers,
+name: publicRequest.name.trim(),
+phone: publicRequest.phone.trim(),
+notes: publicRequest.notes.trim(),
+rentalIncrease: 0,
+spendIncrease: 0,
+createId: uid,
+});
 
 const booking = {
 id: uid("book"),
@@ -512,14 +473,15 @@ return;
 }
 
 setApp((prev) => {
-const customerResult = updateOrCreateCustomer(
-prev.customers,
-newBooking.customerName.trim(),
-newBooking.phone.trim(),
-newBooking.notes.trim(),
-1,
-getDurationPrice(saw, newBooking.duration)
-);
+const customerResult = updateOrCreateCustomer({
+customers: prev.customers,
+name: newBooking.customerName.trim(),
+phone: newBooking.phone.trim(),
+notes: newBooking.notes.trim(),
+rentalIncrease: 1,
+spendIncrease: getDurationPrice(saw, newBooking.duration),
+createId: uid,
+});
 
 const booking = {
 id: uid("book"),
@@ -563,41 +525,16 @@ notes: "",
 
 function setBookingStatus(bookingId, nextStatus) {
 setApp((prev) => {
-const booking = prev.bookings.find((item) => item.id === bookingId);
-if (!booking) return prev;
-
-let customers = prev.customers;
-const wasNotBillable = ["Pending", "Declined"].includes(booking.status);
-const becomesBillable = ["Approved", "Out", "Returned"].includes(nextStatus);
-
-if (wasNotBillable && becomesBillable) {
-customers = prev.customers.map((customer) =>
-customer.id === booking.customerId
-? {
-...customer,
-rentals: Number(customer.rentals || 0) + 1,
-totalSpent: Number(customer.totalSpent || 0) + Number(booking.rentalPrice || 0),
-}
-: customer
-);
-}
-
-const bookings = prev.bookings.map((item) =>
-item.id === bookingId ? { ...item, status: nextStatus } : item
-);
-
-const shouldFreeSaw = !hasBlockingBooking(bookings, booking.sawId, bookingId) && ["Returned", "Declined"].includes(nextStatus);
-const shouldBlockSaw = ["Pending", "Approved", "Out"].includes(nextStatus);
-
-const saws = prev.saws.map((saw) => {
-if (saw.id !== booking.sawId) return saw;
-if (saw.status === "Maintenance" && shouldFreeSaw) return saw;
-if (shouldBlockSaw) return { ...saw, status: "Out" };
-if (shouldFreeSaw) return { ...saw, status: "Available" };
-return saw;
+const next = applyBookingStatusTransition({
+bookings: prev.bookings,
+saws: prev.saws,
+customers: prev.customers,
+bookingId,
+nextStatus,
 });
 
-return { ...prev, customers, bookings, saws };
+if (!next) return prev;
+return { ...prev, ...next };
 });
 }
 
@@ -613,48 +550,31 @@ window.alert("Maintenance issue is required.");
 return;
 }
 
-const item = {
-id: uid("mnt"),
-sawId: saw.id,
-sawName: saw.name,
-issue: maintenanceDraft.issue.trim(),
-priority: maintenanceDraft.priority,
-status: "Open",
-lastService: today(),
-notes: maintenanceDraft.notes.trim(),
-};
-
-setApp((prev) => ({
-...prev,
-maintenance: [item, ...prev.maintenance],
-saws: prev.saws.map((entry) =>
-entry.id === saw.id
-? { ...entry, status: "Maintenance", condition: maintenanceDraft.issue.trim() }
-: entry
-),
-}));
+setApp((prev) => {
+const next = createMaintenanceItem({
+maintenance: prev.maintenance,
+saws: prev.saws,
+draft: maintenanceDraft,
+saw,
+createId: uid,
+date: today(),
+});
+return { ...prev, ...next };
+});
 
 setMaintenanceDraft({ sawId: app.saws[0]?.id || "", issue: "", priority: "Medium", notes: "" });
 }
 
 function markMaintenanceDone(id) {
 setApp((prev) => {
-const item = prev.maintenance.find((entry) => entry.id === id);
-if (!item) return prev;
-
-const sawStillBooked = hasBlockingBooking(prev.bookings, item.sawId, null);
-
-return {
-...prev,
-maintenance: prev.maintenance.map((entry) =>
-entry.id === id ? { ...entry, status: "Done" } : entry
-),
-saws: prev.saws.map((saw) =>
-saw.id === item.sawId
-? { ...saw, status: sawStillBooked ? "Out" : "Available", condition: "Ready" }
-: saw
-),
-};
+const next = applyMaintenanceDone({
+maintenance: prev.maintenance,
+saws: prev.saws,
+bookings: prev.bookings,
+maintenanceId: id,
+});
+if (!next) return prev;
+return { ...prev, ...next };
 });
 }
 
