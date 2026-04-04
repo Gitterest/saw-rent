@@ -575,6 +575,33 @@ maintenanceId: id,
 });
 if (!next) return prev;
 return { ...prev, ...next };
+import React from "react";
+import { PublicRequestPanel } from "./features/public/PublicRequestPanel";
+import { AdminShell } from "./features/admin/AdminShell";
+import { getQuickPrice, money } from "./lib/pricing";
+import { getStatusClass } from "./lib/status";
+import { useSawRentState } from "./state/useSawRentState";
+
+export default function SawRentApp() {
+  const state = useSawRentState();
+
+  if (!state.booted) {
+    return <div style={{ padding: 24, fontFamily: "Arial, sans-serif" }}>Loading...</div>;
+  }
+
+const sawStillBooked = hasBlockingBooking(prev.bookings, item.sawId, null);
+
+return {
+...prev,
+maintenance: prev.maintenance.map((entry) =>
+entry.id === id ? { ...entry, status: "Done" } : entry
+),
+saws: prev.saws.map((saw) =>
+saw.id === item.sawId
+? { ...saw, status: sawStillBooked ? "Out" : "Available", condition: "Ready" }
+: saw
+),
+};
 });
 }
 
@@ -603,7 +630,10 @@ const sidebarItems = [
 
 return (
 <div className="app-shell">
-<style>{`
+
+  return (
+    <div className="app-shell">
+      <style>{`
 * { box-sizing: border-box; }
 body { margin: 0; font-family: Inter, Arial, sans-serif; background: #f1f5f9; color: #0f172a; }
 .app-shell { min-height: 100vh; background: #f1f5f9; color: #0f172a; }
@@ -694,581 +724,56 @@ thead th { border-top: none; background: #f8fafc; color: #475569; font-size: 13p
 }
 `}</style>
 
-<div className="page-wrap">
-<div className="hero-grid">
-<div className="card">
-<div className="hero-top">
-<div className="hero-badges">
-<span className="badge blue">{app.settings.businessName}</span>
-<span className="badge dark">Admin Dashboard</span>
-</div>
-<h1 style={{ margin: "16px 0 0", fontSize: 44, lineHeight: 1.05 }}>Run Saw Rent like a real rental desk.</h1>
-<p style={{ marginTop: 14, maxWidth: 840, color: "#cbd5e1", lineHeight: 1.6 }}>
-Upgraded to an AdminLTE-style layout with a dark ops sidebar, cleaner admin tables, stronger KPI blocks,
-tighter booking controls, and fixed business logic.
-</p>
-<div style={{ display: "flex", gap: 12, flexWrap: "wrap", marginTop: 20 }}>
-<button className="btn btn-primary" onClick={() => setAdminOpen(true)}>Admin Login</button>
-<button className="btn btn-outline-dark" onClick={() => window.alert(`${app.settings.businessName}\n${app.settings.phone}\n${app.settings.location}`)}>Business Contact</button>
-</div>
-</div>
-<div className="hero-bottom">
-<div className="mini-panel">
-<div className="muted" style={{ fontWeight: 700, fontSize: 13 }}>Booking Mode</div>
-<div style={{ fontSize: 28, fontWeight: 900, marginTop: 10 }}>Option A</div>
-<div className="muted" style={{ marginTop: 6, fontSize: 14 }}>Request-to-book stays on.</div>
-</div>
-<div className="mini-panel">
-<div className="muted" style={{ fontWeight: 700, fontSize: 13 }}>Channels</div>
-<div style={{ fontSize: 28, fontWeight: 900, marginTop: 10 }}>4</div>
-<div className="muted" style={{ marginTop: 6, fontSize: 14 }}>App, call, text, walk-in.</div>
-</div>
-<div className="mini-panel">
-<div className="muted" style={{ fontWeight: 700, fontSize: 13 }}>Shop</div>
-<div style={{ fontSize: 24, fontWeight: 900, marginTop: 10 }}>La Porte, IN</div>
-<div className="muted" style={{ marginTop: 6, fontSize: 14 }}>136 Grand Ave.</div>
-</div>
-</div>
-</div>
+      <div className="page-wrap">
+        <div className="hero-grid">
+          <div className="card">
+            <div className="hero-top">
+              <div className="hero-badges"><span className="badge blue">{state.app.settings.businessName}</span><span className="badge dark">Admin Dashboard</span></div>
+              <h1 style={{ margin: "16px 0 0", fontSize: 44, lineHeight: 1.05 }}>Run Saw Rent like a real rental desk.</h1>
+              <p style={{ marginTop: 14, maxWidth: 840, color: "#cbd5e1", lineHeight: 1.6 }}>Upgraded to an AdminLTE-style layout with a dark ops sidebar, cleaner admin tables, stronger KPI blocks, tighter booking controls, and fixed business logic.</p>
+              <div style={{ display: "flex", gap: 12, flexWrap: "wrap", marginTop: 20 }}><button className="btn btn-primary" onClick={() => state.actions.setAdminOpen(true)}>Admin Login</button><button className="btn btn-outline-dark" onClick={() => window.alert(`${state.app.settings.businessName}\n${state.app.settings.phone}\n${state.app.settings.location}`)}>Business Contact</button></div>
+            </div>
+            <div className="hero-bottom">
+              <div className="mini-panel"><div className="muted" style={{ fontWeight: 700, fontSize: 13 }}>Booking Mode</div><div style={{ fontSize: 28, fontWeight: 900, marginTop: 10 }}>Option A</div><div className="muted" style={{ marginTop: 6, fontSize: 14 }}>Request-to-book stays on.</div></div>
+              <div className="mini-panel"><div className="muted" style={{ fontWeight: 700, fontSize: 13 }}>Channels</div><div style={{ fontSize: 28, fontWeight: 900, marginTop: 10 }}>4</div><div className="muted" style={{ marginTop: 6, fontSize: 14 }}>App, call, text, walk-in.</div></div>
+              <div className="mini-panel"><div className="muted" style={{ fontWeight: 700, fontSize: 13 }}>Shop</div><div style={{ fontSize: 24, fontWeight: 900, marginTop: 10 }}>La Porte, IN</div><div className="muted" style={{ marginTop: 6, fontSize: 14 }}>136 Grand Ave.</div></div>
+            </div>
+          </div>
 
-<div className="stats-col">
-<div className="kpi">
-<div className="kpi-main">
-<div className="muted" style={{ fontWeight: 700, fontSize: 12, textTransform: "uppercase" }}>Available Saws</div>
-<div style={{ fontSize: 34, fontWeight: 900, marginTop: 10 }}>{stats.available}</div>
-<div className="muted" style={{ marginTop: 6, fontSize: 14 }}>Ready to rent</div>
-</div>
-<div className="kpi-side kpi-green">🪚</div>
-</div>
-<div className="kpi">
-<div className="kpi-main">
-<div className="muted" style={{ fontWeight: 700, fontSize: 12, textTransform: "uppercase" }}>Pending Requests</div>
-<div style={{ fontSize: 34, fontWeight: 900, marginTop: 10 }}>{stats.pending}</div>
-<div className="muted" style={{ marginTop: 6, fontSize: 14 }}>Need approval</div>
-</div>
-<div className="kpi-side kpi-amber">📋</div>
-</div>
-<div className="kpi">
-<div className="kpi-main">
-<div className="muted" style={{ fontWeight: 700, fontSize: 12, textTransform: "uppercase" }}>Deposits Held</div>
-<div style={{ fontSize: 34, fontWeight: 900, marginTop: 10 }}>{money(stats.depositsHeld)}</div>
-<div className="muted" style={{ marginTop: 6, fontSize: 14 }}>Pending and active rentals</div>
-</div>
-<div className="kpi-side kpi-blue">💵</div>
-</div>
-<div className="card-soft" style={{ padding: 20 }}>
-<div style={{ fontWeight: 800 }}>Quick Quote Panel</div>
-<div className="muted" style={{ fontSize: 14, marginTop: 4 }}>Use this for calls, texts, and walk-ins.</div>
-<div className="field" style={{ marginTop: 16 }}>
-<label>Saw</label>
-<select className="select" value={selectedSawId} onChange={(e) => setSelectedSawId(e.target.value)}>
-{app.saws.map((saw) => (
-<option key={saw.id} value={saw.id}>{saw.name}</option>
-))}
-</select>
-</div>
-<div className="field" style={{ marginTop: 16 }}>
-<label>Duration</label>
-<select className="select" value={selectedDuration} onChange={(e) => setSelectedDuration(e.target.value)}>
-<option value="2h">2 hours</option>
-<option value="4h">4 hours</option>
-<option value="day">1 day</option>
-<option value="weekend">Weekend</option>
-<option value="week">1 week</option>
-</select>
-</div>
-<div className="mini-panel" style={{ marginTop: 16 }}>
-<div className="info-row"><span className="muted">Rental</span><strong>{money(getQuickPrice(quickQuoteSaw, selectedDuration))}</strong></div>
-<div className="info-row" style={{ marginTop: 8 }}><span className="muted">Deposit</span><strong>{money(quickQuoteSaw?.deposit)}</strong></div>
-<div className="info-row" style={{ marginTop: 8 }}><span className="muted">Fuel</span><strong>{quickQuoteSaw?.fuel || "-"}</strong></div>
-<div className="info-row" style={{ marginTop: 8 }}><span className="muted">Status</span><span className={getStatusClass(quickQuoteSaw?.status)}>{quickQuoteSaw?.status || "-"}</span></div>
-</div>
-</div>
-</div>
-</div>
+          <div className="stats-col">
+            <div className="kpi"><div className="kpi-main"><div className="muted" style={{ fontWeight: 700, fontSize: 12, textTransform: "uppercase" }}>Available Saws</div><div style={{ fontSize: 34, fontWeight: 900, marginTop: 10 }}>{state.stats.available}</div><div className="muted" style={{ marginTop: 6, fontSize: 14 }}>Ready to rent</div></div><div className="kpi-side kpi-green">🪚</div></div>
+            <div className="kpi"><div className="kpi-main"><div className="muted" style={{ fontWeight: 700, fontSize: 12, textTransform: "uppercase" }}>Pending Requests</div><div style={{ fontSize: 34, fontWeight: 900, marginTop: 10 }}>{state.stats.pending}</div><div className="muted" style={{ marginTop: 6, fontSize: 14 }}>Need approval</div></div><div className="kpi-side kpi-amber">📋</div></div>
+            <div className="kpi"><div className="kpi-main"><div className="muted" style={{ fontWeight: 700, fontSize: 12, textTransform: "uppercase" }}>Deposits Held</div><div style={{ fontSize: 34, fontWeight: 900, marginTop: 10 }}>{money(state.stats.depositsHeld)}</div><div className="muted" style={{ marginTop: 6, fontSize: 14 }}>Pending and active rentals</div></div><div className="kpi-side kpi-blue">💵</div></div>
+            <div className="card-soft" style={{ padding: 20 }}>
+              <div style={{ fontWeight: 800 }}>Quick Quote Panel</div><div className="muted" style={{ fontSize: 14, marginTop: 4 }}>Use this for calls, texts, and walk-ins.</div>
+              <div className="field" style={{ marginTop: 16 }}><label>Saw</label><select className="select" value={state.selectedSawId} onChange={(e) => state.actions.setSelectedSawId(e.target.value)}>{state.app.saws.map((saw) => <option key={saw.id} value={saw.id}>{saw.name}</option>)}</select></div>
+              <div className="field" style={{ marginTop: 16 }}><label>Duration</label><select className="select" value={state.selectedDuration} onChange={(e) => state.actions.setSelectedDuration(e.target.value)}><option value="2h">2 hours</option><option value="4h">4 hours</option><option value="day">1 day</option><option value="weekend">Weekend</option><option value="week">1 week</option></select></div>
+              <div className="mini-panel" style={{ marginTop: 16 }}><div className="info-row"><span className="muted">Rental</span><strong>{money(getQuickPrice(state.quickQuoteSaw, state.selectedDuration))}</strong></div><div className="info-row" style={{ marginTop: 8 }}><span className="muted">Deposit</span><strong>{money(state.quickQuoteSaw?.deposit)}</strong></div><div className="info-row" style={{ marginTop: 8 }}><span className="muted">Fuel</span><strong>{state.quickQuoteSaw?.fuel || "-"}</strong></div><div className="info-row" style={{ marginTop: 8 }}><span className="muted">Status</span><span className={getStatusClass(state.quickQuoteSaw?.status)}>{state.quickQuoteSaw?.status || "-"}</span></div></div>
+            </div>
+          </div>
+        </div>
 
-<div className="section-grid">
-<div className="card section-pad">
-<div style={{ fontSize: 24, fontWeight: 900 }}>Customer Booking Page</div>
-<div className="muted" style={{ marginTop: 6 }}>Public side. Clean, simple, request-to-book only.</div>
+        <div className="section-grid">
+          <PublicRequestPanel
+            availablePublicSaws={state.availablePublicSaws}
+            publicSearch={state.publicSearch}
+            setPublicSearch={state.actions.setPublicSearch}
+            publicRequest={state.publicRequest}
+            setPublicRequest={state.actions.setPublicRequest}
+            submitPublicRequest={state.submitPublicRequest}
+          />
 
-<div className="search-icon-wrap" style={{ marginTop: 18 }}>
-<span className="search-icon">🔎</span>
-<input className="input search-pad" value={publicSearch} onChange={(e) => setPublicSearch(e.target.value)} placeholder="Search available saws..." />
-</div>
-
-<div className="saw-list" style={{ marginTop: 18 }}>
-{availablePublicSaws.map((saw) => (
-<div key={saw.id} className="saw-tile">
-<div style={{ display: "flex", justifyContent: "space-between", gap: 12, alignItems: "flex-start" }}>
-<div>
-<div style={{ fontSize: 20, fontWeight: 900 }}>{saw.name}</div>
-<div className="saw-meta">{saw.category} · {saw.barSize}</div>
-</div>
-<span className={getStatusClass(saw.status)}>{saw.status}</span>
-</div>
-<div className="grid-2" style={{ marginTop: 16 }}>
-<div className="mini-panel">
-<div className="muted" style={{ fontSize: 13 }}>1 day</div>
-<div style={{ fontWeight: 900, marginTop: 6 }}>{money(saw.rateDay)}</div>
-</div>
-<div className="mini-panel">
-<div className="muted" style={{ fontSize: 13 }}>Deposit</div>
-<div style={{ fontWeight: 900, marginTop: 6 }}>{money(saw.deposit)}</div>
-</div>
-</div>
-<div className="muted" style={{ marginTop: 14, fontSize: 14 }}>Fuel: {saw.fuel}</div>
-<div className="muted" style={{ marginTop: 6, fontSize: 14 }}>Condition: {saw.condition}</div>
-</div>
-))}
-</div>
-
-<form onSubmit={submitPublicRequest} className="mini-panel" style={{ marginTop: 18 }}>
-<div className="grid-2">
-<div className="field">
-<label>Name</label>
-<input className="input" value={publicRequest.name} onChange={(e) => setPublicRequest((prev) => ({ ...prev, name: e.target.value }))} required />
-</div>
-<div className="field">
-<label>Phone</label>
-<input className="input" value={publicRequest.phone} onChange={(e) => setPublicRequest((prev) => ({ ...prev, phone: e.target.value }))} required />
-</div>
-<div className="field">
-<label>Saw</label>
-<select className="select" value={publicRequest.sawId} onChange={(e) => setPublicRequest((prev) => ({ ...prev, sawId: e.target.value }))}>
-{availablePublicSaws.map((saw) => (
-<option key={saw.id} value={saw.id}>{saw.name}</option>
-))}
-</select>
-</div>
-<div className="field">
-<label>Requested Date</label>
-<input type="date" className="input" value={publicRequest.startDate} onChange={(e) => setPublicRequest((prev) => ({ ...prev, startDate: e.target.value }))} required />
-</div>
-<div className="field">
-<label>Duration</label>
-<select className="select" value={publicRequest.duration} onChange={(e) => setPublicRequest((prev) => ({ ...prev, duration: e.target.value }))}>
-<option value="2 hours">2 hours</option>
-<option value="4 hours">4 hours</option>
-<option value="1 day">1 day</option>
-<option value="Weekend">Weekend</option>
-<option value="1 week">1 week</option>
-</select>
-</div>
-<div className="field">
-<label>Notes</label>
-<textarea className="textarea" value={publicRequest.notes} onChange={(e) => setPublicRequest((prev) => ({ ...prev, notes: e.target.value }))} placeholder="Job notes, wood size, questions..." />
-</div>
-</div>
-<div style={{ display: "flex", flexWrap: "wrap", justifyContent: "space-between", alignItems: "center", gap: 12, marginTop: 16, background: "#fff", border: "1px solid #e2e8f0", borderRadius: 14, padding: 14 }}>
-<span className="muted" style={{ fontSize: 14 }}>Customers can still call, text, or stop by the shop instead of using this form.</span>
-<button type="submit" className="btn btn-primary">Submit Request</button>
-</div>
-</form>
-</div>
-
-<div className="card">
-{!adminOpen ? (
-<div className="locked">
-<div className="locked-box">
-<div style={{ width: 64, height: 64, borderRadius: 18, margin: "0 auto", background: "#0f172a", color: "#fff", display: "grid", placeItems: "center", fontSize: 30 }}>📊</div>
-<div style={{ fontSize: 34, fontWeight: 900, marginTop: 20 }}>Admin dashboard locked</div>
-<div className="muted" style={{ marginTop: 10, lineHeight: 1.6 }}>Open the operations side to manage inventory, bookings, customers, deposits, and maintenance.</div>
-<button className="btn btn-primary" style={{ marginTop: 20 }} onClick={() => setAdminOpen(true)}>Open Admin</button>
-</div>
-</div>
-) : !adminUnlocked ? (
-<div className="locked">
-<div className="login-box">
-<div style={{ fontSize: 34, fontWeight: 900 }}>Enter Admin PIN</div>
-<div className="muted" style={{ marginTop: 8 }}>Default demo PIN is 1234. Change it after login.</div>
-<input type="password" className="input" style={{ marginTop: 18 }} value={pin} onChange={(e) => setPin(e.target.value)} placeholder="PIN" />
-<div style={{ display: "flex", gap: 10, marginTop: 14 }}>
-<button className="btn btn-primary" onClick={handleAdminUnlock}>Unlock</button>
-<button className="btn btn-outline" onClick={() => { setAdminOpen(false); setPin(""); }}>Close</button>
-</div>
-</div>
-</div>
-) : (
-<div className="admin-shell">
-<aside className="sidebar">
-<div className="sidebar-top">
-<div className="brand-row">
-<div className="brand-icon">🪚</div>
-<div>
-<div style={{ color: "#fff", fontWeight: 900 }}>{app.settings.businessName}</div>
-<div style={{ color: "#94a3b8", fontSize: 12 }}>Rental Ops Console</div>
-</div>
-</div>
-</div>
-<div className="nav-block">
-<div className="nav-label">Main Navigation</div>
-<div className="nav-list">
-{sidebarItems.map((item) => (
-<button key={item.key} className={`nav-btn ${adminTab === item.key ? "active" : ""}`} onClick={() => setAdminTab(item.key)}>
-<span>{item.icon}</span>
-<span>{item.label}</span>
-</button>
-))}
-</div>
-</div>
-<div className="sidebar-footer">
-<div className="sidebar-card">
-<div style={{ color: "#fff", fontWeight: 800 }}>Shop Contact</div>
-<div style={{ color: "#cbd5e1", marginTop: 10 }}>{app.settings.phone}</div>
-<div style={{ color: "#94a3b8", marginTop: 6 }}>{app.settings.location}</div>
-</div>
-</div>
-</aside>
-
-<main className="main-area">
-<div className="topbar">
-<div>
-<div className="muted" style={{ fontWeight: 700, fontSize: 12, textTransform: "uppercase", letterSpacing: "0.05em" }}>Operations Dashboard</div>
-<div style={{ fontSize: 32, fontWeight: 900, marginTop: 6 }}>{sidebarItems.find((item) => item.key === adminTab)?.label || "Overview"}</div>
-</div>
-<div className="actions">
-<span className="badge slate">Admin</span>
-<span className="badge slate">Request-to-book {app.settings.requestModeOnly ? "On" : "Off"}</span>
-<button className="btn btn-outline btn-sm" onClick={handleAdminLock}>Lock</button>
-</div>
-</div>
-
-<div className="content-pad">
-{adminTab === "overview" && (
-<>
-<div className="grid-3" style={{ gridTemplateColumns: "repeat(4, 1fr)" }}>
-<div className="kpi">
-<div className="kpi-main"><div className="muted" style={{ fontWeight: 700, fontSize: 12, textTransform: "uppercase" }}>Saws Out</div><div style={{ fontSize: 34, fontWeight: 900, marginTop: 10 }}>{stats.out}</div><div className="muted" style={{ marginTop: 6, fontSize: 14 }}>Currently with customers</div></div>
-<div className="kpi-side kpi-blue">📦</div>
-</div>
-<div className="kpi">
-<div className="kpi-main"><div className="muted" style={{ fontWeight: 700, fontSize: 12, textTransform: "uppercase" }}>Pending</div><div style={{ fontSize: 34, fontWeight: 900, marginTop: 10 }}>{stats.pending}</div><div className="muted" style={{ marginTop: 6, fontSize: 14 }}>Approval queue</div></div>
-<div className="kpi-side kpi-amber">📋</div>
-</div>
-<div className="kpi">
-<div className="kpi-main"><div className="muted" style={{ fontWeight: 700, fontSize: 12, textTransform: "uppercase" }}>Customers</div><div style={{ fontSize: 34, fontWeight: 900, marginTop: 10 }}>{app.customers.length}</div><div className="muted" style={{ marginTop: 6, fontSize: 14 }}>Saved renter records</div></div>
-<div className="kpi-side kpi-violet">👤</div>
-</div>
-<div className="kpi">
-<div className="kpi-main"><div className="muted" style={{ fontWeight: 700, fontSize: 12, textTransform: "uppercase" }}>Maintenance</div><div style={{ fontSize: 34, fontWeight: 900, marginTop: 10 }}>{stats.maintenanceOpen}</div><div className="muted" style={{ marginTop: 6, fontSize: 14 }}>Needs attention</div></div>
-<div className="kpi-side kpi-rose">🛠️</div>
-</div>
-</div>
-
-<div className="grid-2" style={{ alignItems: "start" }}>
-<div className="card-soft" style={{ padding: 20 }}>
-<div style={{ fontSize: 22, fontWeight: 900 }}>Recent Bookings</div>
-<div className="muted" style={{ marginTop: 6 }}>Fast view of what just came in.</div>
-<div className="table-wrap" style={{ marginTop: 16 }}>
-<table>
-<thead>
-<tr>
-<th>Customer</th>
-<th>Saw</th>
-<th>Channel</th>
-<th>Status</th>
-</tr>
-</thead>
-<tbody>
-{app.bookings.slice(0, 6).map((booking) => (
-<tr key={booking.id}>
-<td style={{ fontWeight: 700 }}>{booking.customerName}</td>
-<td>{booking.sawName}</td>
-<td>{booking.channel}</td>
-<td><span className={getStatusClass(booking.status)}>{booking.status}</span></td>
-</tr>
-))}
-</tbody>
-</table>
-</div>
-</div>
-
-<div className="card-soft" style={{ padding: 20 }}>
-<div style={{ fontSize: 22, fontWeight: 900 }}>Quick Manual Booking</div>
-<div className="muted" style={{ marginTop: 6 }}>For phone, text, and walk-in customers.</div>
-<form onSubmit={createManualBooking} style={{ display: "grid", gap: 12, marginTop: 16 }}>
-<input className="input" placeholder="Customer name" value={newBooking.customerName} onChange={(e) => setNewBooking((prev) => ({ ...prev, customerName: e.target.value }))} required />
-<input className="input" placeholder="Phone" value={newBooking.phone} onChange={(e) => setNewBooking((prev) => ({ ...prev, phone: e.target.value }))} required />
-<div className="grid-2">
-<select className="select" value={newBooking.channel} onChange={(e) => setNewBooking((prev) => ({ ...prev, channel: e.target.value }))}>
-<option value="Phone">Phone</option>
-<option value="Text">Text</option>
-<option value="Walk-In">Walk-In</option>
-</select>
-<select className="select" value={newBooking.sawId} onChange={(e) => setNewBooking((prev) => ({ ...prev, sawId: e.target.value }))}>
-{app.saws.filter((saw) => saw.status === "Available").map((saw) => (
-<option key={saw.id} value={saw.id}>{saw.name}</option>
-))}
-</select>
-</div>
-<div className="grid-2">
-<input type="date" className="input" value={newBooking.startDate} onChange={(e) => setNewBooking((prev) => ({ ...prev, startDate: e.target.value }))} />
-<input type="date" className="input" value={newBooking.endDate} onChange={(e) => setNewBooking((prev) => ({ ...prev, endDate: e.target.value }))} />
-</div>
-<select className="select" value={newBooking.duration} onChange={(e) => setNewBooking((prev) => ({ ...prev, duration: e.target.value }))}>
-<option value="2 hours">2 hours</option>
-<option value="4 hours">4 hours</option>
-<option value="1 day">1 day</option>
-<option value="Weekend">Weekend</option>
-<option value="1 week">1 week</option>
-</select>
-<textarea className="textarea" placeholder="Notes" value={newBooking.notes} onChange={(e) => setNewBooking((prev) => ({ ...prev, notes: e.target.value }))} />
-<button type="submit" className="btn btn-primary">Create Booking</button>
-</form>
-</div>
-</div>
-</>
-)}
-
-{adminTab === "inventory" && (
-<div className="grid-2" style={{ alignItems: "start" }}>
-<div className="card-soft" style={{ padding: 20 }}>
-<div style={{ fontSize: 22, fontWeight: 900 }}>Inventory Manager</div>
-<div className="muted" style={{ marginTop: 6 }}>Clean list view with corrected saw status logic.</div>
-<div style={{ display: "flex", gap: 12, flexWrap: "wrap", marginTop: 16 }}>
-<select className="select" style={{ maxWidth: 180 }} value={inventoryFilter} onChange={(e) => setInventoryFilter(e.target.value)}>
-<option value="all">All statuses</option>
-<option value="Available">Available</option>
-<option value="Out">Out</option>
-<option value="Maintenance">Maintenance</option>
-</select>
-<div className="search-icon-wrap" style={{ flex: 1, minWidth: 220 }}>
-<span className="search-icon">🔎</span>
-<input className="input search-pad" value={inventorySearch} onChange={(e) => setInventorySearch(e.target.value)} placeholder="Search inventory..." />
-</div>
-</div>
-<div className="table-wrap" style={{ marginTop: 16 }}>
-<table>
-<thead>
-<tr>
-<th>Saw</th>
-<th>Category</th>
-<th>Rate</th>
-<th>Deposit</th>
-<th>Status</th>
-</tr>
-</thead>
-<tbody>
-{filteredInventory.map((saw) => (
-<tr key={saw.id}>
-<td>
-<div style={{ fontWeight: 800 }}>{saw.name}</div>
-<div className="muted" style={{ fontSize: 12, marginTop: 4 }}>{saw.barSize} · {saw.fuel}</div>
-<div className="muted" style={{ fontSize: 12, marginTop: 4 }}>{saw.condition}</div>
-</td>
-<td>{saw.category}</td>
-<td style={{ fontWeight: 700 }}>{money(saw.rateDay)}/day</td>
-<td>{money(saw.deposit)}</td>
-<td><span className={getStatusClass(saw.status)}>{saw.status}</span></td>
-</tr>
-))}
-</tbody>
-</table>
-</div>
-</div>
-
-<div className="card-soft" style={{ padding: 20 }}>
-<div style={{ fontSize: 22, fontWeight: 900 }}>Add Saw</div>
-<div className="muted" style={{ marginTop: 6 }}>Add a new unit to your fleet.</div>
-<form onSubmit={addSaw} style={{ display: "grid", gap: 12, marginTop: 16 }}>
-<input className="input" placeholder="Saw name" value={newSaw.name} onChange={(e) => setNewSaw((prev) => ({ ...prev, name: e.target.value }))} required />
-<div className="grid-2">
-<input className="input" placeholder="Category" value={newSaw.category} onChange={(e) => setNewSaw((prev) => ({ ...prev, category: e.target.value }))} />
-<input className="input" placeholder="Bar size" value={newSaw.barSize} onChange={(e) => setNewSaw((prev) => ({ ...prev, barSize: e.target.value }))} />
-</div>
-<input className="input" placeholder="Fuel" value={newSaw.fuel} onChange={(e) => setNewSaw((prev) => ({ ...prev, fuel: e.target.value }))} />
-<div className="grid-3">
-<input type="number" className="input" placeholder="2h" value={newSaw.rate2h} onChange={(e) => setNewSaw((prev) => ({ ...prev, rate2h: e.target.value }))} />
-<input type="number" className="input" placeholder="4h" value={newSaw.rate4h} onChange={(e) => setNewSaw((prev) => ({ ...prev, rate4h: e.target.value }))} />
-<input type="number" className="input" placeholder="Day" value={newSaw.rateDay} onChange={(e) => setNewSaw((prev) => ({ ...prev, rateDay: e.target.value }))} />
-</div>
-<div className="grid-3">
-<input type="number" className="input" placeholder="Weekend" value={newSaw.weekend} onChange={(e) => setNewSaw((prev) => ({ ...prev, weekend: e.target.value }))} />
-<input type="number" className="input" placeholder="Week" value={newSaw.week} onChange={(e) => setNewSaw((prev) => ({ ...prev, week: e.target.value }))} />
-<input type="number" className="input" placeholder="Deposit" value={newSaw.deposit} onChange={(e) => setNewSaw((prev) => ({ ...prev, deposit: e.target.value }))} />
-</div>
-<input className="input" placeholder="Condition" value={newSaw.condition} onChange={(e) => setNewSaw((prev) => ({ ...prev, condition: e.target.value }))} />
-<textarea className="textarea" placeholder="Notes" value={newSaw.notes} onChange={(e) => setNewSaw((prev) => ({ ...prev, notes: e.target.value }))} />
-<button type="submit" className="btn btn-primary">Add Saw</button>
-</form>
-</div>
-</div>
-)}
-
-{adminTab === "bookings" && (
-<div className="card-soft" style={{ padding: 20 }}>
-<div style={{ display: "flex", gap: 12, justifyContent: "space-between", alignItems: "center", flexWrap: "wrap" }}>
-<div>
-<div style={{ fontSize: 22, fontWeight: 900 }}>Bookings Manager</div>
-<div className="muted" style={{ marginTop: 6 }}>Approve, mark out, return, or decline.</div>
-</div>
-<select className="select" style={{ width: 200 }} value={bookingFilter} onChange={(e) => setBookingFilter(e.target.value)}>
-<option value="all">All bookings</option>
-<option value="Pending">Pending</option>
-<option value="Approved">Approved</option>
-<option value="Out">Out</option>
-<option value="Returned">Returned</option>
-<option value="Declined">Declined</option>
-</select>
-</div>
-
-<div style={{ display: "grid", gap: 16, marginTop: 18 }}>
-{filteredBookings.map((booking) => (
-<div key={booking.id} className="booking-card">
-<div style={{ display: "flex", gap: 16, justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap" }}>
-<div>
-<div style={{ display: "flex", gap: 8, flexWrap: "wrap", alignItems: "center" }}>
-<div style={{ fontSize: 22, fontWeight: 900 }}>{booking.customerName}</div>
-<span className={getStatusClass(booking.status)}>{booking.status}</span>
-<span className="badge slate">{booking.channel}</span>
-</div>
-<div className="muted" style={{ marginTop: 6 }}>{booking.sawName} · {booking.phone}</div>
-<div className="muted" style={{ marginTop: 6 }}>{booking.startDate} to {booking.endDate} · {booking.duration}</div>
-<div style={{ marginTop: 12, fontSize: 14 }}>{booking.notes || "No notes"}</div>
-</div>
-<div className="summary-grid">
-<div className="summary-box"><div className="muted" style={{ fontSize: 12 }}>Rental</div><div style={{ fontWeight: 900, marginTop: 6 }}>{money(booking.rentalPrice)}</div></div>
-<div className="summary-box"><div className="muted" style={{ fontSize: 12 }}>Deposit</div><div style={{ fontWeight: 900, marginTop: 6 }}>{money(booking.deposit)}</div></div>
-</div>
-</div>
-<div className="actions">
-<button className="btn btn-success btn-sm" onClick={() => setBookingStatus(booking.id, "Approved")}>Approve</button>
-<button className="btn btn-outline btn-sm" onClick={() => setBookingStatus(booking.id, "Out")}>Mark Out</button>
-<button className="btn btn-outline btn-sm" onClick={() => setBookingStatus(booking.id, "Returned")}>Mark Returned</button>
-<button className="btn btn-danger btn-sm" onClick={() => setBookingStatus(booking.id, "Declined")}>Decline</button>
-</div>
-</div>
-))}
-</div>
-</div>
-)}
-
-{adminTab === "customers" && (
-<div className="card-soft" style={{ padding: 20 }}>
-<div style={{ fontSize: 22, fontWeight: 900 }}>Customer Records</div>
-<div className="muted" style={{ marginTop: 6 }}>Track repeat renters and total spend.</div>
-<div className="table-wrap" style={{ marginTop: 16 }}>
-<table>
-<thead>
-<tr>
-<th>Customer</th>
-<th>Phone</th>
-<th>Rentals</th>
-<th>Total Spent</th>
-<th>Notes</th>
-</tr>
-</thead>
-<tbody>
-{app.customers.map((customer) => (
-<tr key={customer.id}>
-<td style={{ fontWeight: 700 }}>{customer.name}</td>
-<td>{customer.phone}</td>
-<td>{customer.rentals}</td>
-<td style={{ fontWeight: 700 }}>{money(customer.totalSpent)}</td>
-<td>{customer.notes || "No notes"}</td>
-</tr>
-))}
-</tbody>
-</table>
-</div>
-</div>
-)}
-
-{adminTab === "maintenance" && (
-<div className="grid-2" style={{ alignItems: "start" }}>
-<div className="card-soft" style={{ padding: 20 }}>
-<div style={{ fontSize: 22, fontWeight: 900 }}>Maintenance Log</div>
-<div className="muted" style={{ marginTop: 6 }}>Anything unsafe or questionable stays blocked.</div>
-<div style={{ display: "grid", gap: 16, marginTop: 16 }}>
-{app.maintenance.map((item) => (
-<div key={item.id} className="booking-card">
-<div style={{ display: "flex", gap: 16, justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap" }}>
-<div>
-<div style={{ fontWeight: 900, fontSize: 18 }}>{item.sawName}</div>
-<div className="muted" style={{ marginTop: 6 }}>{item.issue}</div>
-<div style={{ marginTop: 10, fontSize: 14 }}>{item.notes || "No notes"}</div>
-</div>
-<div className="actions">
-<span className={item.priority === "High" ? "badge red" : "badge amber"}>{item.priority}</span>
-<span className={getStatusClass(item.status)}>{item.status}</span>
-</div>
-</div>
-<div className="actions">
-<button className="btn btn-outline btn-sm" onClick={() => markMaintenanceDone(item.id)}>Mark Done</button>
-</div>
-</div>
-))}
-</div>
-</div>
-
-<div className="card-soft" style={{ padding: 20 }}>
-<div style={{ fontSize: 22, fontWeight: 900 }}>Add Maintenance Item</div>
-<div className="muted" style={{ marginTop: 6 }}>Lock the saw until the issue is handled.</div>
-<form onSubmit={addMaintenanceItem} style={{ display: "grid", gap: 12, marginTop: 16 }}>
-<select className="select" value={maintenanceDraft.sawId} onChange={(e) => setMaintenanceDraft((prev) => ({ ...prev, sawId: e.target.value }))}>
-{app.saws.map((saw) => (
-<option key={saw.id} value={saw.id}>{saw.name}</option>
-))}
-</select>
-<input className="input" placeholder="Issue" value={maintenanceDraft.issue} onChange={(e) => setMaintenanceDraft((prev) => ({ ...prev, issue: e.target.value }))} required />
-<select className="select" value={maintenanceDraft.priority} onChange={(e) => setMaintenanceDraft((prev) => ({ ...prev, priority: e.target.value }))}>
-<option value="Low">Low</option>
-<option value="Medium">Medium</option>
-<option value="High">High</option>
-</select>
-<textarea className="textarea" placeholder="Notes" value={maintenanceDraft.notes} onChange={(e) => setMaintenanceDraft((prev) => ({ ...prev, notes: e.target.value }))} />
-<button type="submit" className="btn btn-primary">Add Maintenance Item</button>
-</form>
-</div>
-</div>
-)}
-
-{adminTab === "settings" && (
-<div className="card-soft" style={{ padding: 20 }}>
-<div style={{ fontSize: 22, fontWeight: 900 }}>Business Settings</div>
-<div className="muted" style={{ marginTop: 6 }}>Local storage demo settings for now.</div>
-<div className="grid-2" style={{ marginTop: 16 }}>
-<div className="field">
-<label>Business Name</label>
-<input className="input" value={app.settings.businessName} onChange={(e) => updateSetting("businessName", e.target.value)} />
-</div>
-<div className="field">
-<label>Phone</label>
-<input className="input" value={app.settings.phone} onChange={(e) => updateSetting("phone", e.target.value)} />
-</div>
-<div className="field">
-<label>Location</label>
-<input className="input" value={app.settings.location} onChange={(e) => updateSetting("location", e.target.value)} />
-</div>
-<div className="field">
-<label>Admin PIN</label>
-<input className="input" value={app.settings.adminPin} onChange={(e) => updateSetting("adminPin", e.target.value)} />
-</div>
-</div>
-<div style={{ display: "flex", justifyContent: "space-between", gap: 12, alignItems: "center", marginTop: 16, background: "#f8fafc", border: "1px solid #e2e8f0", borderRadius: 16, padding: 16, flexWrap: "wrap" }}>
-<div>
-<div style={{ fontWeight: 800 }}>Request-to-book only</div>
-<div className="muted" style={{ marginTop: 4 }}>Keep manual approval on for every app request.</div>
-</div>
-<label style={{ display: "inline-flex", alignItems: "center", gap: 8, fontWeight: 700 }}>
-<input type="checkbox" checked={app.settings.requestModeOnly} onChange={(e) => updateSetting("requestModeOnly", e.target.checked)} />
-Enabled
-</label>
-</div>
-<div className="actions" style={{ marginTop: 16 }}>
-<button className="btn btn-outline" onClick={handleAdminLock}>Lock Admin</button>
-<button className="btn btn-danger" onClick={resetAllData}>Reset Demo Data</button>
-</div>
-</div>
-)}
-</div>
-</main>
-</div>
-)}
-</div>
-</div>
-</div>
-</div>
-);
+          <div className="card">
+            {!state.adminOpen ? (
+              <div className="locked"><div className="locked-box"><div style={{ width: 64, height: 64, borderRadius: 18, margin: "0 auto", background: "#0f172a", color: "#fff", display: "grid", placeItems: "center", fontSize: 30 }}>📊</div><div style={{ fontSize: 34, fontWeight: 900, marginTop: 20 }}>Admin dashboard locked</div><div className="muted" style={{ marginTop: 10, lineHeight: 1.6 }}>Open the operations side to manage inventory, bookings, customers, deposits, and maintenance.</div><button className="btn btn-primary" style={{ marginTop: 20 }} onClick={() => state.actions.setAdminOpen(true)}>Open Admin</button></div></div>
+            ) : !state.adminUnlocked ? (
+              <div className="locked"><div className="login-box"><div style={{ fontSize: 34, fontWeight: 900 }}>Enter Admin PIN</div><div className="muted" style={{ marginTop: 8 }}>Default demo PIN is 1234. Change it after login.</div><input type="password" className="input" style={{ marginTop: 18 }} value={state.pin} onChange={(e) => state.actions.setPin(e.target.value)} placeholder="PIN" /><div style={{ display: "flex", gap: 10, marginTop: 14 }}><button className="btn btn-primary" onClick={state.handleAdminUnlock}>Unlock</button><button className="btn btn-outline" onClick={() => { state.actions.setAdminOpen(false); state.actions.setPin(""); }}>Close</button></div></div></div>
+            ) : (
+              <AdminShell state={state} />
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
 }
