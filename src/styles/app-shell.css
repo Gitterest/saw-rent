@@ -86,3 +86,31 @@ thead th { border-top: none; background: #f8fafc; color: #475569; font-size: 13p
 .hero-bottom, .grid-2, .grid-3, .saw-list { grid-template-columns: 1fr; }
 .summary-grid { grid-template-columns: 1fr; min-width: 0; }
 }
+
+.public-panel { display: grid; gap: 0; }
+.public-header { display: grid; gap: 18px; }
+.section-eyebrow { margin: 0; font-size: 12px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; color: #0284c7; }
+.public-title { margin: 6px 0 0; font-size: 32px; line-height: 1.1; }
+.public-subtitle { margin: 10px 0 0; line-height: 1.6; max-width: 64ch; }
+.request-steps { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+.step-item { display: flex; gap: 10px; align-items: flex-start; padding: 12px; border-radius: 14px; background: #f8fafc; border: 1px solid #e2e8f0; }
+.step-index { width: 24px; height: 24px; border-radius: 999px; background: #0f172a; color: #fff; display: inline-flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; flex-shrink: 0; }
+.step-title { font-size: 13px; font-weight: 800; color: #0f172a; }
+.step-detail { margin-top: 3px; font-size: 12px; color: #64748b; line-height: 1.45; }
+.inventory-headline { display: flex; align-items: baseline; gap: 8px; }
+.inventory-headline strong { font-size: 20px; }
+.public-empty { border: 1px dashed #cbd5e1; background: #f8fafc; border-radius: 14px; padding: 16px; }
+.public-form { border-radius: 20px; }
+.form-title-row { display: flex; flex-wrap: wrap; gap: 12px; justify-content: space-between; align-items: flex-start; }
+.form-title { margin: 0; font-size: 22px; }
+.selected-saw-summary { padding: 10px 12px; border-radius: 12px; background: #fff; border: 1px solid #e2e8f0; min-width: 220px; text-align: right; }
+.public-success-card { display: grid; grid-template-columns: 32px 1fr; gap: 12px; align-items: flex-start; border-radius: 14px; border: 1px solid #bbf7d0; background: #f0fdf4; padding: 14px; }
+.success-icon { width: 32px; height: 32px; border-radius: 999px; background: #16a34a; color: #fff; font-weight: 900; display: inline-flex; align-items: center; justify-content: center; }
+.success-title { font-size: 16px; font-weight: 900; color: #14532d; }
+.success-list { margin: 8px 0 0; padding-left: 18px; color: #166534; display: grid; gap: 4px; font-size: 14px; }
+.public-form-footer { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 12px; background: #fff; border: 1px solid #e2e8f0; border-radius: 14px; padding: 14px; }
+
+@media (max-width: 900px) {
+  .request-steps { grid-template-columns: 1fr; }
+  .selected-saw-summary { min-width: 0; width: 100%; text-align: left; }
+}
