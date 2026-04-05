@@ -43,6 +43,9 @@ export function useSawRentState() {
   const [adminOpen, setAdminOpen] = useState(false);
   const [adminUnlocked, setAdminUnlocked] = useState(false);
   const [pin, setPin] = useState("");
+  const [adminAuthError, setAdminAuthError] = useState("");
+  const [failedPinAttempts, setFailedPinAttempts] = useState(0);
+  const [adminLockedUntil, setAdminLockedUntil] = useState(null);
   const [publicSearch, setPublicSearch] = useState("");
   const [inventorySearch, setInventorySearch] = useState("");
   const [inventoryFilter, setInventoryFilter] = useState("all");
@@ -118,6 +121,21 @@ export function useSawRentState() {
     { key: "settings", label: "Settings", icon: "⚙️" },
   ];
 
+  const isAdminAuthorized = adminOpen && adminUnlocked;
+
+  function closeAdmin() {
+    setAdminOpen(false);
+    setAdminUnlocked(false);
+    setPin("");
+    setAdminAuthError("");
+    setAdminTab("overview");
+  }
+
+  function openAdminLogin() {
+    setAdminOpen(true);
+    setAdminAuthError("");
+  }
+
   const actions = {
     setPublicSearch,
     setInventorySearch,
@@ -130,8 +148,9 @@ export function useSawRentState() {
     setNewSaw,
     setNewBooking,
     setMaintenanceDraft,
-    setAdminOpen,
     setPin,
+    closeAdmin,
+    openAdminLogin,
   };
 
   function resetAllData() {
@@ -145,18 +164,39 @@ export function useSawRentState() {
   }
 
   function handleAdminUnlock() {
-    if (pin === app.settings.adminPin) {
-      setAdminUnlocked(true);
+    const now = Date.now();
+    if (adminLockedUntil && now < adminLockedUntil) {
+      const seconds = Math.max(1, Math.ceil((adminLockedUntil - now) / 1000));
+      setAdminAuthError(`Too many failed attempts. Try again in ${seconds}s.`);
       return;
     }
-    window.alert("Wrong PIN.");
+
+    if (!/^\d{4,8}$/.test(pin)) {
+      setAdminAuthError("PIN must be 4-8 digits.");
+      return;
+    }
+
+    if (pin === app.settings.adminPin) {
+      setAdminUnlocked(true);
+      setAdminAuthError("");
+      setFailedPinAttempts(0);
+      setAdminLockedUntil(null);
+      setPin("");
+      return;
+    }
+    const nextFailedAttempts = failedPinAttempts + 1;
+    const shouldLock = nextFailedAttempts >= 5;
+    setFailedPinAttempts(shouldLock ? 0 : nextFailedAttempts);
+    setAdminLockedUntil(shouldLock ? now + 60_000 : null);
+    setAdminAuthError(
+      shouldLock
+        ? "Too many failed attempts. Admin access locked for 60 seconds."
+        : "Incorrect PIN."
+    );
   }
 
   function handleAdminLock() {
-    setAdminUnlocked(false);
-    setAdminOpen(false);
-    setPin("");
-    setAdminTab("overview");
+    closeAdmin();
   }
 
   function submitPublicRequest(e) {
@@ -371,6 +411,17 @@ export function useSawRentState() {
   }
 
   function updateSetting(field, value) {
+    if (field === "adminPin") {
+      const nextPin = String(value).replace(/\D/g, "").slice(0, 8);
+      if (nextPin.length < 4) {
+        setAdminAuthError("Admin PIN must be at least 4 digits.");
+      } else {
+        setAdminAuthError("");
+      }
+      setApp((prev) => ({ ...prev, settings: { ...prev.settings, adminPin: nextPin } }));
+      return;
+    }
+
     setApp((prev) => ({ ...prev, settings: { ...prev.settings, [field]: value } }));
   }
 
@@ -379,7 +430,9 @@ export function useSawRentState() {
     booted,
     adminOpen,
     adminUnlocked,
+    isAdminAuthorized,
     pin,
+    adminAuthError,
     publicSearch,
     inventorySearch,
     inventoryFilter,

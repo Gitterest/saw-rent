@@ -31,7 +31,7 @@ export default function SawRentApp() {
                 and fixed business logic.
               </p>
               <div style={{ display: "flex", gap: 12, flexWrap: "wrap", marginTop: 20 }}>
-                <button className="btn btn-primary" onClick={() => state.actions.setAdminOpen(true)}>
+                <button className="btn btn-primary" onClick={state.actions.openAdminLogin}>
                   Admin Login
                 </button>
                 <button
@@ -148,34 +148,32 @@ export default function SawRentApp() {
                   <div className="muted" style={{ marginTop: 10, lineHeight: 1.6 }}>
                     Open the operations side to manage inventory, bookings, customers, deposits, and maintenance.
                   </div>
-                  <button className="btn btn-primary" style={{ marginTop: 20 }} onClick={() => state.actions.setAdminOpen(true)}>
+                  <button className="btn btn-primary" style={{ marginTop: 20 }} onClick={state.actions.openAdminLogin}>
                     Open Admin
                   </button>
                 </div>
               </div>
-            ) : !state.adminUnlocked ? (
+            ) : !state.isAdminAuthorized ? (
               <div className="locked">
                 <div className="login-box">
                   <div style={{ fontSize: 34, fontWeight: 900 }}>Enter Admin PIN</div>
-                  <div className="muted" style={{ marginTop: 8 }}>
-                    Default demo PIN is 1234. Change it after login.
-                  </div>
+                  <div className="muted" style={{ marginTop: 8 }}>Use your admin credentials to continue.</div>
                   <input
                     type="password"
                     className="input"
                     style={{ marginTop: 18 }}
                     value={state.pin}
                     onChange={(e) => state.actions.setPin(e.target.value)}
-                    placeholder="PIN"
+                    placeholder="4-8 digit PIN"
                   />
+                  {state.adminAuthError ? (
+                    <div style={{ marginTop: 12, color: "#b91c1c", fontWeight: 700 }}>{state.adminAuthError}</div>
+                  ) : null}
                   <div style={{ display: "flex", gap: 10, marginTop: 14 }}>
                     <button className="btn btn-primary" onClick={state.handleAdminUnlock}>Unlock</button>
                     <button
                       className="btn btn-outline"
-                      onClick={() => {
-                        state.actions.setAdminOpen(false);
-                        state.actions.setPin("");
-                      }}
+                      onClick={state.actions.closeAdmin}
                     >
                       Close
                     </button>

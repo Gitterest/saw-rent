@@ -9,7 +9,11 @@ import { SettingsTab } from "./tabs/SettingsTab";
 import { AdminContext } from "./AdminContext";
 
 export function AdminShell({ state }) {
-  const { app, adminTab, sidebarItems, handleAdminLock } = state;
+  const { app, adminTab, sidebarItems, handleAdminLock, isAdminAuthorized } = state;
+
+  if (!isAdminAuthorized) {
+    return null;
+  }
 
   return (
     <AdminContext.Provider value={state}>
