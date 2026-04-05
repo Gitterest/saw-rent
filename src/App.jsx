@@ -136,6 +136,8 @@ export default function SawRentApp() {
             setPublicSearch={state.actions.setPublicSearch}
             publicRequest={state.publicRequest}
             setPublicRequest={state.actions.setPublicRequest}
+            publicRequestConfirmation={state.publicRequestConfirmation}
+            clearPublicRequestConfirmation={() => state.setPublicRequestConfirmation(null)}
             submitPublicRequest={state.submitPublicRequest}
           />
 

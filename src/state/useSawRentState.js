@@ -54,6 +54,7 @@ export function useSawRentState() {
   const [selectedSawId, setSelectedSawId] = useState(app.saws[0]?.id || "");
   const [adminTab, setAdminTab] = useState("overview");
   const [publicRequest, setPublicRequest] = useState({ name: "", phone: "", sawId: app.saws[0]?.id || "", startDate: getTomorrow(), duration: "1 day", notes: "" });
+  const [publicRequestConfirmation, setPublicRequestConfirmation] = useState(null);
   const [newSaw, setNewSaw] = useState({ name: "", category: "Homeowner", barSize: '18"', fuel: "50:1 Mix", deposit: 150, rate2h: 25, rate4h: 35, rateDay: 55, weekend: 90, week: 180, condition: "Ready", notes: "" });
   const [newBooking, setNewBooking] = useState({ customerName: "", phone: "", channel: "Phone", sawId: app.saws[0]?.id || "", startDate: getToday(), endDate: getTomorrow(), duration: "1 day", notes: "" });
   const [maintenanceDraft, setMaintenanceDraft] = useState({ sawId: app.saws[0]?.id || "", issue: "", priority: "Medium", notes: "" });
@@ -158,6 +159,7 @@ export function useSawRentState() {
     setApp(fresh);
     setSelectedSawId(fresh.saws[0]?.id || "");
     setPublicRequest({ name: "", phone: "", sawId: fresh.saws[0]?.id || "", startDate: getTomorrow(), duration: "1 day", notes: "" });
+    setPublicRequestConfirmation(null);
     setNewBooking({ customerName: "", phone: "", channel: "Phone", sawId: fresh.saws[0]?.id || "", startDate: getToday(), endDate: getTomorrow(), duration: "1 day", notes: "" });
     setMaintenanceDraft({ sawId: fresh.saws[0]?.id || "", issue: "", priority: "Medium", notes: "" });
     clearState();
@@ -215,8 +217,9 @@ export function useSawRentState() {
         0
       );
 
+      const bookingId = makeUid("book");
       const booking = {
-        id: makeUid("book"),
+        id: bookingId,
         sawId: saw.id,
         sawName: saw.name,
         customerId: customerResult.customerId,
@@ -241,8 +244,14 @@ export function useSawRentState() {
       };
     });
 
+    setPublicRequestConfirmation({
+      requestRef: `REQ-${new Date().getFullYear()}-${Date.now().toString().slice(-6)}`,
+      sawName: saw.name,
+      startDate: publicRequest.startDate,
+      duration: publicRequest.duration,
+      contactPhone: publicRequest.phone.trim(),
+    });
     setPublicRequest({ name: "", phone: "", sawId: app.saws[0]?.id || "", startDate: getTomorrow(), duration: "1 day", notes: "" });
-    window.alert("Request submitted. Review it in Bookings.");
   }
 
   function addSaw(e) {
@@ -441,6 +450,7 @@ export function useSawRentState() {
     selectedSawId,
     adminTab,
     publicRequest,
+    publicRequestConfirmation,
     newSaw,
     newBooking,
     maintenanceDraft,
@@ -454,6 +464,7 @@ export function useSawRentState() {
     handleAdminUnlock,
     handleAdminLock,
     submitPublicRequest,
+    setPublicRequestConfirmation,
     addSaw,
     createManualBooking,
     setBookingStatus,
