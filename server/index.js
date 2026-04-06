@@ -1,4 +1,4 @@
-﻿import "dotenv/config"
+import "dotenv/config"
 import crypto from "node:crypto"
 import fs from "node:fs/promises"
 import path from "node:path"

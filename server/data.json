@@ -1,7 +1,7 @@
 {
   "saws": [
     {
-      "id": "bd0c618a-0d66-4a56-b7f2-3525c13f993e",
+      "id": "saw-550xp",
       "name": "Husqvarna 550XP Mark II",
       "category": "Professional",
       "barSize": "20 in",
@@ -10,11 +10,11 @@
       "depositCents": 25000,
       "status": "available",
       "notes": "High-torque pro saw for hardwood and storm cleanup.",
-      "createdAt": "2026-04-06T15:39:36.108Z",
-      "updatedAt": "2026-04-06T15:39:36.108Z"
+      "createdAt": "2026-04-06T00:00:00.000Z",
+      "updatedAt": "2026-04-06T00:00:00.000Z"
     },
     {
-      "id": "fcf75b87-617e-41d7-844b-25b3f76de582",
+      "id": "saw-ms271",
       "name": "Stihl MS 271 Farm Boss",
       "category": "Farm & Ranch",
       "barSize": "18 in",
@@ -23,11 +23,11 @@
       "depositCents": 22000,
       "status": "available",
       "notes": "Balanced power and control for medium to large cuts.",
-      "createdAt": "2026-04-06T15:39:36.108Z",
-      "updatedAt": "2026-04-06T15:39:36.108Z"
+      "createdAt": "2026-04-06T00:00:00.000Z",
+      "updatedAt": "2026-04-06T00:00:00.000Z"
     },
     {
-      "id": "13134015-16b4-4f37-98e6-541dee929de3",
+      "id": "saw-cs590",
       "name": "Echo CS-590 Timber Wolf",
       "category": "Heavy Duty",
       "barSize": "20 in",
@@ -36,11 +36,11 @@
       "depositCents": 24000,
       "status": "available",
       "notes": "Reliable torque-heavy option for long sessions.",
-      "createdAt": "2026-04-06T15:39:36.109Z",
-      "updatedAt": "2026-04-06T15:39:36.109Z"
+      "createdAt": "2026-04-06T00:00:00.000Z",
+      "updatedAt": "2026-04-06T00:00:00.000Z"
     },
     {
-      "id": "18b34781-c085-4839-8d52-f84ffd885fd5",
+      "id": "saw-ms170",
       "name": "Stihl MS 170",
       "category": "Homeowner",
       "barSize": "16 in",
@@ -49,11 +49,11 @@
       "depositCents": 15000,
       "status": "unavailable",
       "notes": "Light-duty saw currently held for parts replacement.",
-      "createdAt": "2026-04-06T15:39:36.109Z",
-      "updatedAt": "2026-04-06T15:39:36.109Z"
+      "createdAt": "2026-04-06T00:00:00.000Z",
+      "updatedAt": "2026-04-06T00:00:00.000Z"
     },
     {
-      "id": "0663c2c9-580b-479c-9c88-501f1fa1a5bf",
+      "id": "saw-460rancher",
       "name": "Husqvarna 460 Rancher",
       "category": "Farm & Ranch",
       "barSize": "24 in",
@@ -62,31 +62,12 @@
       "depositCents": 28000,
       "status": "maintenance",
       "notes": "In maintenance for chain brake and clutch inspection.",
-      "createdAt": "2026-04-06T15:39:36.109Z",
-      "updatedAt": "2026-04-06T15:39:36.109Z"
+      "createdAt": "2026-04-06T00:00:00.000Z",
+      "updatedAt": "2026-04-06T00:00:00.000Z"
     }
   ],
-  "requests": [
-    {
-      "id": "86451781-bc79-406e-88f7-1a35c36f4f9d",
-      "sawId": "bd0c618a-0d66-4a56-b7f2-3525c13f993e",
-      "sawName": "Husqvarna 550XP Mark II",
-      "customerName": "Flow Check",
-      "phone": "2195550101",
-      "startDate": "2026-04-07",
-      "endDate": "2026-04-08",
-      "pickupPreference": "pickup",
-      "notes": "script verification",
-      "rentalDays": 2,
-      "rentalTotalCents": 15600,
-      "depositCents": 25000,
-      "status": "requested",
-      "paymentStatus": "unpaid",
-      "createdAt": "2026-04-06T15:39:36.169Z",
-      "updatedAt": "2026-04-06T15:39:36.169Z"
-    }
-  ],
+  "requests": [],
   "bookings": [],
-  "updatedAt": "2026-04-06T15:39:36.169Z",
-  "createdAt": "2026-04-06T15:39:36.108Z"
+  "updatedAt": "2026-04-06T00:00:00.000Z",
+  "createdAt": "2026-04-06T00:00:00.000Z"
 }

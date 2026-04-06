@@ -1,4 +1,4 @@
-﻿import { useEffect, useMemo, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { loadStripe } from "@stripe/stripe-js"
 
 import { api } from "./api"
@@ -203,7 +203,7 @@ function PublicApp() {
                   <span className={statusClass(saw.status)}>{normalizeStatusLabel(saw.status)}</span>
                 </div>
                 <div className="saw-row"><span>Category</span><strong>{saw.category}</strong></div>
-                <div className="saw-row"><span>Bar / Engine</span><strong>{saw.barSize} · {saw.engineCc}cc</strong></div>
+                <div className="saw-row"><span>Bar / Engine</span><strong>{saw.barSize} Â· {saw.engineCc}cc</strong></div>
                 <div className="saw-row"><span>Daily Price</span><strong>{formatMoney(saw.dailyRateCents)}</strong></div>
                 <div className="saw-row"><span>Deposit</span><strong>{formatMoney(saw.depositCents)}</strong></div>
                 <p className="saw-notes">{saw.notes || "No notes."}</p>
@@ -572,7 +572,7 @@ function AdminApp() {
                   <tr key={saw.id}>
                     <td>
                       <strong>{saw.name}</strong>
-                      <div className="table-sub">{saw.barSize} · {saw.engineCc}cc</div>
+                      <div className="table-sub">{saw.barSize} Â· {saw.engineCc}cc</div>
                     </td>
                     <td>{saw.category}</td>
                     <td>{formatMoney(saw.dailyRateCents)} / {formatMoney(saw.depositCents)}</td>

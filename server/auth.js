@@ -1,4 +1,4 @@
-﻿import crypto from "node:crypto"
+import crypto from "node:crypto"
 
 const COOKIE_NAME = "sawrent_admin"
 const SESSION_TTL_MS = 1000 * 60 * 60 * 12

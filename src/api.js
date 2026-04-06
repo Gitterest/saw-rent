@@ -1,4 +1,4 @@
-﻿const API_ROOT = "/api"
+const API_ROOT = "/api"
 
 async function parseResponse(response) {
   const contentType = response.headers.get("content-type") || ""

@@ -1,4 +1,4 @@
-﻿# Saw Rent (Production App)
+# Saw Rent (Production App)
 
 Full-stack chainsaw rental app with:
 - public renter request + Stripe Checkout deposit flow
