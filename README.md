@@ -1,16 +1,62 @@
-# React + Vite
+﻿# Saw Rent (Production App)
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Full-stack chainsaw rental app with:
+- public renter request + Stripe Checkout deposit flow
+- protected admin operations console
+- secure server-side admin/session/payment handling
 
-Currently, two official plugins are available:
+## Requirements
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- Node.js 20+
+- Stripe account with live products/payments enabled
 
-## React Compiler
+## Environment
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+Create `.env` in project root (or use your deployment provider env settings).
 
-## Expanding the ESLint configuration
+Required variables:
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+- `VITE_STRIPE_PUBLISHABLE_KEY`
+- `STRIPE_SECRET_KEY`
+- `STRIPE_WEBHOOK_SECRET`
+- `ADMIN_PASSWORD`
+- `ADMIN_SESSION_SECRET`
+
+Optional:
+
+- `PORT` (defaults to `5173`)
+
+Use `.env.example` for key names only.
+
+## Run
+
+```bash
+npm install
+npm run dev
+npm run build
+npm run lint
+```
+
+## Stripe Webhook
+
+Configure Stripe webhook endpoint:
+
+- URL: `https://<your-domain>/api/webhooks/stripe`
+- Event: `checkout.session.completed`
+
+Set `STRIPE_WEBHOOK_SECRET` from Stripe for signature verification.
+
+## App Routes
+
+- Public renter flow: `/`
+- Admin flow: `/admin`
+
+All admin APIs are server-protected and require authenticated admin session cookies.
+
+## Deployment Notes
+
+1. Build frontend with `npm run build`.
+2. Run server with `npm start`.
+3. Ensure all env vars are configured in production.
+4. Serve over HTTPS so secure cookies + Stripe checkout work correctly.
+
