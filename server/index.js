@@ -180,6 +180,39 @@ export function createApp() {
   app.use(express.json({ limit: "200kb" }))
   app.use(cookieParser())
 
+  function handleAdminLogin(req, res, next) {
+    try {
+      const { password } = req.body || {}
+      assert(typeof password === "string" && password.length > 0, 400, "Password is required.")
+
+      const ok = verifyAdminPassword(password)
+      if (!ok) {
+        res.status(401).json({ error: "Invalid credentials." })
+        return
+      }
+
+      const token = createSessionToken("owner")
+      setAdminCookie(res, token)
+      res.json({ authenticated: true })
+    } catch (error) {
+      next(error)
+    }
+  }
+
+  function handleAdminLogout(_req, res) {
+    clearAdminCookie(res)
+    res.json({ authenticated: false })
+  }
+
+  function handleAdminSession(req, res, next) {
+    try {
+      const session = readAdminSession(req)
+      res.json({ authenticated: Boolean(session) })
+    } catch (error) {
+      next(error)
+    }
+  }
+
   app.get("/api/public/inventory", async (_req, res, next) => {
     try {
       const state = await readState()
@@ -317,38 +350,14 @@ export function createApp() {
     }
   })
 
-  app.post("/api/admin/login", (req, res, next) => {
-    try {
-      const { password } = req.body || {}
-      assert(typeof password === "string" && password.length > 0, 400, "Password is required.")
+  app.post("/api/admin/login", handleAdminLogin)
+  app.post("/api/admin/logout", handleAdminLogout)
+  app.get("/api/admin/session", handleAdminSession)
 
-      const ok = verifyAdminPassword(password)
-      if (!ok) {
-        res.status(401).json({ error: "Invalid credentials." })
-        return
-      }
-
-      const token = createSessionToken("owner")
-      setAdminCookie(res, token)
-      res.json({ authenticated: true })
-    } catch (error) {
-      next(error)
-    }
-  })
-
-  app.post("/api/admin/logout", (_req, res) => {
-    clearAdminCookie(res)
-    res.json({ authenticated: false })
-  })
-
-  app.get("/api/admin/session", (req, res, next) => {
-    try {
-      const session = readAdminSession(req)
-      res.json({ authenticated: Boolean(session) })
-    } catch (error) {
-      next(error)
-    }
-  })
+  // Compatibility aliases for admin UIs that post directly under /admin/*.
+  app.post("/admin/login", handleAdminLogin)
+  app.post("/admin/logout", handleAdminLogout)
+  app.get("/admin/session", handleAdminSession)
 
   app.get("/api/admin/dashboard", requireAdmin, async (_req, res, next) => {
     try {

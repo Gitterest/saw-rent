@@ -1,4 +1,10 @@
-const API_ROOT = "/api"
+function normalizeRoot(value, fallback = "/api") {
+  const raw = String(value || "").trim()
+  if (!raw) return fallback
+  return raw.endsWith("/") ? raw.slice(0, -1) : raw
+}
+
+const API_ROOT = normalizeRoot(import.meta.env.VITE_API_ROOT, "/api")
 
 async function parseResponse(response) {
   const contentType = response.headers.get("content-type") || ""
@@ -12,14 +18,21 @@ async function parseResponse(response) {
 }
 
 async function send(path, { method = "GET", body } = {}) {
-  const response = await fetch(`${API_ROOT}${path}`, {
+  const request = {
     method,
     credentials: "include",
     headers: {
       "Content-Type": "application/json",
     },
     body: body ? JSON.stringify(body) : undefined,
-  })
+  }
+
+  const response = await fetch(`${API_ROOT}${path}`, request)
+
+  if (response.status === 404 && API_ROOT === "/api") {
+    const fallbackResponse = await fetch(path, request)
+    return parseResponse(fallbackResponse)
+  }
 
   return parseResponse(response)
 }

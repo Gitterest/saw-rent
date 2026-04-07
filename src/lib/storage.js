@@ -28,11 +28,34 @@ export function createSeedData() {
   };
 }
 
+function isRecord(value) {
+  return Boolean(value) && typeof value === "object" && !Array.isArray(value);
+}
+
+function sanitizeObjectArray(value, fallback) {
+  if (!Array.isArray(value)) return fallback;
+  const next = value.filter((entry) => isRecord(entry));
+  return next.length > 0 ? next : fallback;
+}
+
+function sanitizeState(candidate) {
+  const seed = createSeedData();
+  if (!isRecord(candidate)) return seed;
+
+  return {
+    settings: isRecord(candidate.settings) ? { ...seed.settings, ...candidate.settings } : seed.settings,
+    saws: sanitizeObjectArray(candidate.saws, seed.saws),
+    customers: sanitizeObjectArray(candidate.customers, seed.customers),
+    bookings: sanitizeObjectArray(candidate.bookings, seed.bookings),
+    maintenance: sanitizeObjectArray(candidate.maintenance, seed.maintenance),
+  };
+}
+
 export function loadState() {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (!raw) return createSeedData();
-    return JSON.parse(raw);
+    return sanitizeState(JSON.parse(raw));
   } catch {
     return createSeedData();
   }

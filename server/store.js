@@ -85,6 +85,31 @@ function createSeedState() {
   }
 }
 
+function isRecord(value) {
+  return Boolean(value) && typeof value === "object" && !Array.isArray(value)
+}
+
+function sanitizeObjectArray(value, fallback) {
+  if (!Array.isArray(value)) return fallback
+  const next = value.filter((entry) => isRecord(entry))
+  return next
+}
+
+function sanitizeState(candidate) {
+  const seed = createSeedState()
+  if (!isRecord(candidate)) {
+    return seed
+  }
+
+  return {
+    ...seed,
+    ...candidate,
+    saws: sanitizeObjectArray(candidate.saws, seed.saws),
+    requests: sanitizeObjectArray(candidate.requests, []),
+    bookings: sanitizeObjectArray(candidate.bookings, []),
+  }
+}
+
 let cache = null
 let writeQueue = Promise.resolve()
 
@@ -108,7 +133,15 @@ export async function readState() {
 
   await ensureStoreFile()
   const raw = await fs.readFile(DATA_PATH, "utf8")
-  cache = JSON.parse(raw)
+  let parsed
+
+  try {
+    parsed = JSON.parse(raw)
+  } catch {
+    parsed = createSeedState()
+  }
+
+  cache = sanitizeState(parsed)
   return deepClone(cache)
 }
 
@@ -116,7 +149,7 @@ export async function mutateState(mutator) {
   writeQueue = writeQueue.then(async () => {
     const current = await readState()
     const draft = deepClone(current)
-    const next = (await mutator(draft)) || draft
+    const next = sanitizeState((await mutator(draft)) || draft)
     next.updatedAt = new Date().toISOString()
     cache = next
     await fs.writeFile(DATA_PATH, JSON.stringify(next, null, 2), "utf8")
