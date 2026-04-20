@@ -1,10 +1,10 @@
 import { expect } from "@playwright/test"
 
-export const ADMIN_WORKSPACE_STORAGE_KEY = "saw-rent-admin-workspace-v3"
+export const ADMIN_WORKSPACE_STORAGE_KEY = "saw-rent-admin-workspace-v2"
 
 const SHELL_STORAGE_KEYS = [
   ADMIN_WORKSPACE_STORAGE_KEY,
-  "saw-rent-admin-workspace-v2",
+  "saw-rent-admin-workspace-v3",
 ]
 
 export const dashboardPayload = {
