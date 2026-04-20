@@ -16,6 +16,7 @@ dist-ssr
 playwright-report
 test-results
 *.local
+<<<<<<< HEAD
 .env
 .env.*
 !.env.example
@@ -33,4 +34,23 @@ test-results
 *.ntvs*
 *.njsproj
 *.sln
+=======
+.env
+.env.*
+!.env.example
+
+.env
+.env.*
+!.env.example
+
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+>>>>>>> c1aede9b8f7d84f60e30f8bb7cb06ec1b0943735
 *.sw?

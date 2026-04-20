@@ -38,6 +38,7 @@ import {
   readCryptoMonitorSchedulerConfig,
   syncCryptoPaymentToBooking,
 } from "./cryptoMonitorWorker.js"
+<<<<<<< HEAD
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
@@ -55,6 +56,25 @@ const BOOKING_TRANSITIONS = {
   out: "returned",
 }
 
+=======
+
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = path.dirname(__filename)
+const ROOT_DIR = path.resolve(__dirname, "..")
+const DIST_DIR = path.join(ROOT_DIR, "dist")
+const PORT = Number(process.env.PORT || 5173)
+
+const stripeSecretKey = process.env.STRIPE_SECRET_KEY || ""
+const stripeWebhookSecret = process.env.STRIPE_WEBHOOK_SECRET || ""
+const stripeClient = stripeSecretKey ? new Stripe(stripeSecretKey) : null
+
+const BOOKING_TRANSITIONS = {
+  requested: "approved",
+  approved: "out",
+  out: "returned",
+}
+
+>>>>>>> c1aede9b8f7d84f60e30f8bb7cb06ec1b0943735
 function isPhoneLike(value) {
   return /^[0-9+()\-\s]{7,20}$/.test(String(value || "").trim())
 }
@@ -114,6 +134,34 @@ function buildCryptoOpsFields(entry) {
   }
 }
 
+<<<<<<< HEAD
+function buildCryptoOpsFields(entry) {
+  return {
+    destinationProvider: entry.destinationProvider || entry.cryptoAddressProvider || "",
+    destinationUnique: entry.destinationUnique === true,
+    destinationAllocationState: entry.destinationAllocationState || "",
+    destinationAllocation: entry.destinationAllocation || null,
+    btcDerivationIndex: Number.isFinite(Number(entry.btcDerivationIndex)) ? Number(entry.btcDerivationIndex) : null,
+    btcDerivationPath: entry.btcDerivationPath || "",
+    xmrAccountIndex: Number.isFinite(Number(entry.xmrAccountIndex)) ? Number(entry.xmrAccountIndex) : null,
+    xmrSubaddressIndex: Number.isFinite(Number(entry.xmrSubaddressIndex)) ? Number(entry.xmrSubaddressIndex) : null,
+    expectedCryptoAmount: entry.expectedCryptoAmount || entry.cryptoAmount || "",
+    receivedCryptoAmount: entry.receivedCryptoAmount || "",
+    monitoredAt: entry.monitoredAt || null,
+    lastChainCheckAt: entry.lastChainCheckAt || null,
+    chainConfirmations: Number(entry.chainConfirmations || 0),
+    monitoringState: entry.monitoringState || "",
+    monitorError: entry.monitorError || "",
+    customerSubmittedTxid: entry.customerSubmittedTxid || "",
+    customerTxidSubmittedAt: entry.customerTxidSubmittedAt || null,
+    customerTxidNote: entry.customerTxidNote || "",
+    cryptoAlertReviewedAt: entry.cryptoAlertReviewedAt || null,
+    cryptoAlertReviewedState: entry.cryptoAlertReviewedState || "",
+  }
+}
+
+=======
+>>>>>>> c1aede9b8f7d84f60e30f8bb7cb06ec1b0943735
 function sanitizeRequest(request, { includeOpsCryptoDetails = false } = {}) {
   const effectivePaymentStatus = getEffectivePaymentStatus(request)
   const cryptoAmountFiatSnapshot = request.cryptoAmountFiatSnapshot || null
@@ -176,6 +224,18 @@ function sanitizeBooking(booking, { includeOpsCryptoDetails = false } = {}) {
     ? Number(booking.refundableUsdAmount)
     : depositUsdAmount
 
+<<<<<<< HEAD
+function sanitizeBooking(booking, { includeOpsCryptoDetails = false } = {}) {
+  const cryptoAmountFiatSnapshot = booking.cryptoAmountFiatSnapshot || null
+  const depositUsdAmount = Number.isFinite(Number(booking.depositUsdAmount))
+    ? Number(booking.depositUsdAmount)
+    : Number((Number(booking.depositCents || 0) / 100).toFixed(2))
+  const refundableUsdAmount = Number.isFinite(Number(booking.refundableUsdAmount))
+    ? Number(booking.refundableUsdAmount)
+    : depositUsdAmount
+
+=======
+>>>>>>> c1aede9b8f7d84f60e30f8bb7cb06ec1b0943735
   return {
     id: booking.id,
     requestId: booking.requestId || null,
@@ -362,7 +422,11 @@ function adminSnapshot(state, { cryptoMonitorStatus = null } = {}) {
     cryptoMonitor: cryptoMonitorStatus || {},
   }
 }
+<<<<<<< HEAD
 
+=======
+
+>>>>>>> c1aede9b8f7d84f60e30f8bb7cb06ec1b0943735
 export function createApp({
   cryptoRateProvider = null,
   cryptoAddressProvider = null,
@@ -658,6 +722,15 @@ export function createApp({
     }
   })
 
+<<<<<<< HEAD
+      res.json({ sessionId: session.id, sessionUrl: session.url, url: session.url })
+    } catch (error) {
+      next(error)
+    }
+  })
+
+=======
+>>>>>>> c1aede9b8f7d84f60e30f8bb7cb06ec1b0943735
   app.post("/api/public/requests/:id/crypto-payment", async (req, res, next) => {
     try {
       const { currency } = req.body || {}
@@ -741,6 +814,7 @@ export function createApp({
     try {
       const state = await readState()
       res.json(adminSnapshot(state, { cryptoMonitorStatus: monitorRunner.getStatus() }))
+<<<<<<< HEAD
     } catch (error) {
       next(error)
     }
@@ -943,6 +1017,346 @@ export function createApp({
 
       const record = nextState.maintenanceRecords.find((entry) => entry.id === req.params.id)
       res.json({ record: sanitizeMaintenanceRecord(record) })
+=======
+>>>>>>> c1aede9b8f7d84f60e30f8bb7cb06ec1b0943735
+    } catch (error) {
+      next(error)
+    }
+  })
+
+  app.patch("/api/admin/settings", requireAdmin, async (req, res, next) => {
+    try {
+      const {
+        businessName,
+        contactPhone,
+        contactEmail,
+        location,
+        defaultPickupPreference,
+        defaultRentalDays,
+        maintenanceLeadDays,
+      } = req.body || {}
+
+      if (businessName !== undefined) {
+        assert(typeof businessName === "string" && businessName.trim().length >= 2, 400, "Business name is required.")
+      }
+      if (contactPhone !== undefined) {
+        assert(contactPhone === "" || isPhoneLike(contactPhone), 400, "Contact phone is invalid.")
+      }
+      if (contactEmail !== undefined) {
+        assert(contactEmail === "" || isEmailLike(contactEmail), 400, "Contact email is invalid.")
+      }
+      if (location !== undefined) {
+        assert(typeof location === "string" && location.trim().length <= 120, 400, "Location is invalid.")
+      }
+      if (defaultPickupPreference !== undefined) {
+        assert(["pickup", "dropoff", "flexible"].includes(defaultPickupPreference), 400, "Default pickup preference is invalid.")
+      }
+
+      const parsedDefaultRentalDays = defaultRentalDays === undefined ? undefined : Number.parseInt(defaultRentalDays, 10)
+      const parsedMaintenanceLeadDays = maintenanceLeadDays === undefined ? undefined : Number.parseInt(maintenanceLeadDays, 10)
+
+      if (parsedDefaultRentalDays !== undefined) {
+        assert(Number.isFinite(parsedDefaultRentalDays) && parsedDefaultRentalDays >= 1 && parsedDefaultRentalDays <= 14, 400, "Default rental days must be between 1 and 14.")
+      }
+      if (parsedMaintenanceLeadDays !== undefined) {
+        assert(Number.isFinite(parsedMaintenanceLeadDays) && parsedMaintenanceLeadDays >= 0 && parsedMaintenanceLeadDays <= 30, 400, "Maintenance lead days must be between 0 and 30.")
+      }
+
+      const nextState = await mutateState((state) => {
+        state.settings = {
+          ...state.settings,
+          ...(businessName !== undefined ? { businessName: businessName.trim() } : {}),
+          ...(contactPhone !== undefined ? { contactPhone: String(contactPhone).trim() } : {}),
+          ...(contactEmail !== undefined ? { contactEmail: String(contactEmail).trim() } : {}),
+          ...(location !== undefined ? { location: location.trim() } : {}),
+          ...(defaultPickupPreference !== undefined ? { defaultPickupPreference } : {}),
+          ...(parsedDefaultRentalDays !== undefined ? { defaultRentalDays: parsedDefaultRentalDays } : {}),
+          ...(parsedMaintenanceLeadDays !== undefined ? { maintenanceLeadDays: parsedMaintenanceLeadDays } : {}),
+        }
+        return state
+      })
+
+<<<<<<< HEAD
+      const updated = nextState.requests.find((entry) => entry.id === req.params.id)
+      res.json({ request: sanitizeRequest(updated, { includeOpsCryptoDetails: true }) })
+    } catch (error) {
+      next(error)
+    }
+  })
+
+  app.patch("/api/admin/requests/:id/crypto-payment", requireAdmin, async (req, res, next) => {
+    try {
+      const { action, blockchainTxid, note } = req.body || {}
+      assert(["detected", "confirm", "underpaid", "cancel"].includes(action), 400, "Invalid crypto payment action.")
+
+      const now = new Date()
+      const nextState = await mutateState((state) => {
+        const request = state.requests.find((entry) => entry.id === req.params.id)
+        assert(Boolean(request), 404, "Request not found.")
+
+        applyCryptoTransition(request, action, {
+          blockchainTxid,
+          note,
+          now,
+        })
+        request.updatedAt = now.toISOString()
+
+        const booking = state.bookings.find((entry) => entry.requestId === request.id)
+        syncCryptoPaymentToBooking(request, booking, now)
+
+        return state
+      })
+
+      const updated = nextState.requests.find((entry) => entry.id === req.params.id)
+      res.json({ request: sanitizeRequest(updated, { includeOpsCryptoDetails: true }) })
+    } catch (error) {
+      next(error)
+    }
+  })
+
+  app.post("/api/admin/crypto-monitor/run", requireAdmin, async (_req, res, next) => {
+    try {
+      const result = await monitorRunner.runOnce({ source: "manual" })
+      const state = result.state || await readState()
+
+      res.json({
+        checked: result.checked || 0,
+        updated: result.updated || 0,
+        skipped: result.skipped === true,
+        reason: result.reason || "",
+        results: result.results || [],
+        dashboard: adminSnapshot(state, { cryptoMonitorStatus: monitorRunner.getStatus() }),
+      })
+    } catch (error) {
+      next(error)
+    }
+  })
+
+  app.patch("/api/admin/requests/:id/crypto-alert", requireAdmin, async (req, res, next) => {
+    try {
+      const { reviewKey } = req.body || {}
+      assert(typeof reviewKey === "string" && reviewKey.trim().length > 0, 400, "reviewKey is required.")
+
+      const now = new Date()
+      const nextState = await mutateState((state) => {
+        const request = state.requests.find((entry) => entry.id === req.params.id)
+        assert(Boolean(request), 404, "Request not found.")
+        assert(request.paymentMethod === "crypto", 409, "Request is not using crypto payment.")
+
+        request.cryptoAlertReviewedAt = now.toISOString()
+        request.cryptoAlertReviewedState = reviewKey.trim()
+        request.updatedAt = now.toISOString()
+
+        const booking = state.bookings.find((entry) => entry.requestId === request.id)
+        syncCryptoPaymentToBooking(request, booking, now)
+
+        return state
+      })
+
+      const updated = nextState.requests.find((entry) => entry.id === req.params.id)
+      res.json({
+        request: sanitizeRequest(updated, { includeOpsCryptoDetails: true }),
+        dashboard: adminSnapshot(nextState, { cryptoMonitorStatus: monitorRunner.getStatus() }),
+      })
+=======
+      res.json({ settings: sanitizeSettings(nextState.settings) })
+>>>>>>> c1aede9b8f7d84f60e30f8bb7cb06ec1b0943735
+    } catch (error) {
+      next(error)
+    }
+  })
+
+  app.post("/api/admin/maintenance", requireAdmin, async (req, res, next) => {
+    try {
+      const { sawId, summary, details, priority, dueDate } = req.body || {}
+
+      assert(typeof sawId === "string" && sawId.trim().length > 0, 400, "Saw selection is required.")
+      assert(typeof summary === "string" && summary.trim().length >= 3, 400, "Maintenance summary is required.")
+      assert(details === undefined || typeof details === "string", 400, "Maintenance details are invalid.")
+      assert(["low", "medium", "high"].includes(priority), 400, "Maintenance priority is invalid.")
+      assert(!dueDate || isIsoDate(dueDate), 400, "Maintenance due date is invalid.")
+
+      const now = new Date().toISOString()
+      const nextState = await mutateState((state) => {
+        const saw = state.saws.find((entry) => entry.id === sawId)
+        assert(Boolean(saw), 404, "Saw not found.")
+
+        const record = {
+          id: crypto.randomUUID(),
+<<<<<<< HEAD
+          requestId: request.id,
+          sawId: request.sawId,
+          sawName: request.sawName,
+          customerName: request.customerName,
+          phone: request.phone,
+          startDate: request.startDate,
+          endDate: request.endDate,
+          pickupPreference: request.pickupPreference,
+          notes: request.notes,
+          rentalDays: request.rentalDays,
+          rentalTotalCents: request.rentalTotalCents,
+          depositCents: request.depositCents,
+          paymentMethod: request.paymentMethod || "",
+          paymentStatus: request.paymentStatus,
+          cryptoCurrency: request.cryptoCurrency || "",
+          cryptoAddress: request.cryptoAddress || "",
+          cryptoAmount: request.cryptoAmount || "",
+          cryptoAmountFiatSnapshot: request.cryptoAmountFiatSnapshot || null,
+          cryptoRateSource: request.cryptoRateSource || request.cryptoAmountFiatSnapshot?.rateSource || "",
+          cryptoRateUsd: Number(request.cryptoRateUsd || request.cryptoAmountFiatSnapshot?.rateUsd || 0),
+          cryptoRateQuotedAt: request.cryptoRateQuotedAt || request.cryptoAmountFiatSnapshot?.quotedAt || null,
+          cryptoQrData: request.cryptoQrData || "",
+          cryptoPaymentId: request.cryptoPaymentId || "",
+          cryptoAttempt: Number(request.cryptoAttempt || 0),
+          cryptoAddressProvider: request.cryptoAddressProvider || "",
+          paymentExpiresAt: request.paymentExpiresAt || null,
+          paymentConfirmedAt: request.paymentConfirmedAt || request.paidAt || null,
+          blockchainTxid: request.blockchainTxid || "",
+          depositUsdAmount: Number.isFinite(Number(request.depositUsdAmount))
+            ? Number(request.depositUsdAmount)
+            : Number((Number(request.depositCents || 0) / 100).toFixed(2)),
+          refundableUsdAmount: Number.isFinite(Number(request.refundableUsdAmount))
+            ? Number(request.refundableUsdAmount)
+            : Number((Number(request.depositCents || 0) / 100).toFixed(2)),
+          ...buildCryptoOpsFields(request),
+          paymentEvents: Array.isArray(request.paymentEvents) ? request.paymentEvents : [],
+          status: "requested",
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+=======
+          sawId: saw.id,
+          sawName: saw.name,
+          summary: summary.trim(),
+          details: String(details || "").trim(),
+          priority,
+          status: "open",
+          dueDate: dueDate || "",
+          createdAt: now,
+          updatedAt: now,
+          completedAt: null,
+          history: [
+            {
+              id: crypto.randomUUID(),
+              type: "created",
+              note: String(details || summary).trim(),
+              status: "open",
+              createdAt: now,
+            },
+          ],
+>>>>>>> c1aede9b8f7d84f60e30f8bb7cb06ec1b0943735
+        }
+
+        state.maintenanceRecords.unshift(record)
+
+        const hasActiveBooking = state.bookings.some(
+          (booking) => booking.sawId === saw.id && isActiveBooking(booking.status),
+        )
+
+        if (!hasActiveBooking && saw.status !== "unavailable") {
+          saw.status = "maintenance"
+          saw.updatedAt = now
+        }
+
+        return state
+      })
+
+<<<<<<< HEAD
+      const booking = nextState.bookings[0]
+      res.status(201).json({ booking: sanitizeBooking(booking, { includeOpsCryptoDetails: true }) })
+=======
+      res.status(201).json({ record: sanitizeMaintenanceRecord(nextState.maintenanceRecords[0]) })
+>>>>>>> c1aede9b8f7d84f60e30f8bb7cb06ec1b0943735
+    } catch (error) {
+      next(error)
+    }
+  })
+
+  app.patch("/api/admin/maintenance/:id", requireAdmin, async (req, res, next) => {
+    try {
+      const { status, note, summary, details, priority, dueDate } = req.body || {}
+
+      if (status !== undefined) {
+        assert(["open", "in_progress", "completed"].includes(status), 400, "Maintenance status is invalid.")
+      }
+      if (note !== undefined) {
+        assert(typeof note === "string" && note.trim().length >= 2, 400, "Maintenance note is invalid.")
+      }
+      if (summary !== undefined) {
+        assert(typeof summary === "string" && summary.trim().length >= 3, 400, "Maintenance summary is invalid.")
+      }
+      if (details !== undefined) {
+        assert(typeof details === "string", 400, "Maintenance details are invalid.")
+      }
+      if (priority !== undefined) {
+        assert(["low", "medium", "high"].includes(priority), 400, "Maintenance priority is invalid.")
+      }
+      if (dueDate !== undefined) {
+        assert(dueDate === "" || isIsoDate(dueDate), 400, "Maintenance due date is invalid.")
+      }
+
+      const now = new Date().toISOString()
+      const nextState = await mutateState((state) => {
+        const record = state.maintenanceRecords.find((entry) => entry.id === req.params.id)
+        assert(Boolean(record), 404, "Maintenance record not found.")
+
+        const previousStatus = record.status
+        if (summary !== undefined) record.summary = summary.trim()
+        if (details !== undefined) record.details = details.trim()
+        if (priority !== undefined) record.priority = priority
+        if (dueDate !== undefined) record.dueDate = dueDate
+        if (status !== undefined) record.status = status
+
+        record.updatedAt = now
+        if (status === "completed") {
+          record.completedAt = now
+        } else if (status && previousStatus === "completed") {
+          record.completedAt = null
+        }
+
+        if (note !== undefined || status !== undefined || summary !== undefined || details !== undefined || priority !== undefined || dueDate !== undefined) {
+          record.history = Array.isArray(record.history) ? record.history : []
+          record.history.unshift({
+            id: crypto.randomUUID(),
+            type: status !== undefined ? "status" : "note",
+            note: String(note || details || summary || "Maintenance record updated.").trim(),
+            status: record.status,
+            createdAt: now,
+          })
+        }
+
+        const saw = state.saws.find((entry) => entry.id === record.sawId)
+        if (saw && saw.status !== "unavailable") {
+          if (record.status === "completed") {
+            const otherOpenRecords = state.maintenanceRecords.some(
+              (entry) => entry.id !== record.id && entry.sawId === record.sawId && entry.status !== "completed",
+            )
+            if (!otherOpenRecords) {
+              if (saw.status === "maintenance") {
+                saw.status = "available"
+              }
+              updateSawAvailability(state, saw.id)
+            }
+          } else {
+            const hasActiveBooking = state.bookings.some(
+              (booking) => booking.sawId === saw.id && isActiveBooking(booking.status),
+            )
+            if (!hasActiveBooking) {
+              saw.status = "maintenance"
+              saw.updatedAt = now
+            }
+          }
+        }
+
+        return state
+      })
+
+<<<<<<< HEAD
+      const booking = nextState.bookings.find((entry) => entry.id === req.params.id)
+      res.json({ booking: sanitizeBooking(booking, { includeOpsCryptoDetails: true }) })
+=======
+      const record = nextState.maintenanceRecords.find((entry) => entry.id === req.params.id)
+      res.json({ record: sanitizeMaintenanceRecord(record) })
+>>>>>>> c1aede9b8f7d84f60e30f8bb7cb06ec1b0943735
     } catch (error) {
       next(error)
     }
@@ -1261,6 +1675,75 @@ export async function startServer({ port = PORT } = {}) {
     }
   })
 
+<<<<<<< HEAD
+  return app
+}
+
+export async function startServer({ port = PORT } = {}) {
+  const app = createApp()
+
+  app.use("/api", (_req, res) => {
+    res.status(404).json({ error: "API endpoint not found." })
+  })
+
+  if (process.env.NODE_ENV !== "production") {
+    const { createServer } = await import("vite")
+    const vite = await createServer({
+      root: ROOT_DIR,
+      configLoader: "native",
+      server: { middlewareMode: true },
+      appType: "custom",
+    })
+
+    app.use(vite.middlewares)
+
+    app.use(async (req, res, next) => {
+      if (req.method !== "GET") {
+        next()
+        return
+      }
+
+      try {
+        const url = req.originalUrl
+        const templatePath = path.join(ROOT_DIR, "index.html")
+        const html = await fs.readFile(templatePath, "utf8")
+        const result = await vite.transformIndexHtml(url, html)
+        res.status(200).set({ "Content-Type": "text/html" }).end(result)
+      } catch (error) {
+        vite.ssrFixStacktrace(error)
+        next(error)
+      }
+    })
+  } else {
+    app.use(express.static(DIST_DIR))
+    app.use((req, res, next) => {
+      if (req.method !== "GET") {
+        next()
+        return
+      }
+
+      res.sendFile(path.join(DIST_DIR, "index.html"))
+    })
+  }
+
+  app.use((error, _req, res, next) => {
+    void next
+    const status = Number(error?.status || 500)
+    const message = status >= 500 ? "Internal server error." : error.message
+    res.status(status).json({ error: message })
+  })
+
+  const server = app.listen(port, () => {
+    console.log(`Saw Rent server listening on port ${port}`)
+    const started = app.locals.cryptoMonitorScheduler?.start()
+    if (started) {
+      const status = app.locals.cryptoMonitorRunner?.getStatus()
+      console.log(`Crypto monitor scheduler running every ${Math.round(Number(status?.intervalMs || 0) / 1000)}s`)
+    }
+  })
+
+=======
+>>>>>>> c1aede9b8f7d84f60e30f8bb7cb06ec1b0943735
   server.on("close", () => {
     app.locals.cryptoMonitorScheduler?.stop()
   })
@@ -1270,6 +1753,11 @@ export async function startServer({ port = PORT } = {}) {
 
 const isDirectRun = process.argv[1] && path.resolve(process.argv[1]) === __filename
 
+<<<<<<< HEAD
+const isDirectRun = process.argv[1] && path.resolve(process.argv[1]) === __filename
+
+=======
+>>>>>>> c1aede9b8f7d84f60e30f8bb7cb06ec1b0943735
 if (isDirectRun && process.env.SAW_RENT_NO_AUTOSTART !== "1") {
   startServer().catch((error) => {
     console.error("Server failed to start", error)
