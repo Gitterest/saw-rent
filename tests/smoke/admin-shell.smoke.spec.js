@@ -209,5 +209,5 @@ test("crypto admin review exposes explorer and copy helpers inside the shell", a
   await expect.poll(() => page.evaluate(() => window.__copiedText)).toBe(txid)
   await page.getByRole("button", { name: "Copy expected amount" }).click()
   await expect.poll(() => page.evaluate(() => window.__copiedText)).toBe("0.00272727 BTC")
-  await expect(page.getByRole("term", { name: "TXID submitted" })).toBeVisible()
+  await expect(page.locator(".crypto-admin-timeline").getByText("TXID submitted")).toBeVisible()
 })
