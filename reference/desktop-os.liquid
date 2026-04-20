@@ -1,0 +1,636 @@
+{%- liquid
+  assign start_menu = linklists[settings.start_menu]
+  assign desktop_collection = collections[settings.desktop_collection]
+  assign icon_limit = settings.desktop_icon_limit | default: 12
+
+  assign support_page = pages.contact
+  if support_page == blank
+    assign support_page = pages.support
+  endif
+  # Fallback if the shop's contact handle differs. This is used for non-OS pages or no-JS.
+  assign support_fallback_url = support_page.url | default: '/pages/contact'
+-%}
+
+<div
+  id="pf-os"
+  class="pf-os"
+  data-os
+  data-accent="{{ settings.accent | escape }}"
+  data-customer-logged-in="{% if customer %}true{% else %}false{% endif %}"
+  data-customer-tags="{{ customer.tags | join: ',' }}"
+  data-support-fallback="{{ support_fallback_url }}"
+  data-route-root="{{ routes.root_url }}"
+  data-route-cart="{{ routes.cart_url }}"
+  data-route-search="{{ routes.search_url }}"
+  data-route-collections="{{ routes.all_collections_url }}"
+  data-route-storefront="{{ routes.all_products_collection_url }}"
+  data-route-account="{{ routes.account_url }}"
+  data-settings-manifest="{{ 'phiasfab.settings.manifest.json' | asset_url }}"
+>
+  <div class="pf-wallpaper">
+    {%- if settings.wallpaper != blank -%}
+      {%- assign wallpaper = settings.wallpaper -%}
+      <img
+        src="{{ wallpaper | image_url: width: 2400 }}"
+        width="{{ wallpaper.width }}"
+        height="{{ wallpaper.height }}"
+        alt=""
+        loading="eager"
+        decoding="async"
+      >
+    {%- endif -%}
+  </div>
+
+  <main class="pf-desktop" data-desktop aria-label="Desktop">
+    <ol class="pf-icons" data-icons tabindex="0" aria-label="Desktop icons">
+      <li
+        class="pf-icon"
+        tabindex="0"
+        role="button"
+        data-osapp="vault"
+        data-app-id="vault"
+        aria-label="Open Digital Vault"
+      >
+        <div class="pf-iconimg"><span class="pf-emoji">🗄️</span></div>
+        <div class="pf-iconlabel">Digital Vault</div>
+      </li>
+      <li
+        class="pf-icon"
+        tabindex="0"
+        role="button"
+        data-osapp="shop"
+        data-app-id="shop"
+        aria-label="Open Shop"
+      >
+        <div class="pf-iconimg"><span class="pf-emoji">🛍️</span></div>
+        <div class="pf-iconlabel">Shop</div>
+      </li>
+      <li class="pf-icon" tabindex="0" role="button" data-osapp="studio" data-app-id="studio" aria-label="Open Studio">
+        <div class="pf-iconimg"><span class="pf-emoji">🧪</span></div>
+        <div class="pf-iconlabel">Studio</div>
+      </li>
+      <li
+        class="pf-icon"
+        tabindex="0"
+        role="button"
+        data-osapp="app-store"
+        data-app-id="app-store"
+        aria-label="Open App Store"
+      >
+        <div class="pf-iconimg"><span class="pf-emoji">🛍️</span></div>
+        <div class="pf-iconlabel">App Store</div>
+      </li>
+      <li
+        class="pf-icon"
+        tabindex="0"
+        role="button"
+        data-osapp="settings"
+        data-app-id="settings"
+        aria-label="Open Settings"
+      >
+        <div class="pf-iconimg"><span class="pf-emoji">⚙️</span></div>
+        <div class="pf-iconlabel">Settings</div>
+      </li>
+      <li class="pf-icon" tabindex="0" role="button" data-osapp="tools" data-app-id="tools" aria-label="Open Tools">
+        <div class="pf-iconimg"><span class="pf-emoji">🧰</span></div>
+        <div class="pf-iconlabel">Tools</div>
+      </li>
+      <li
+        class="pf-icon"
+        tabindex="0"
+        role="button"
+        data-osapp="support-center"
+        data-app-id="support-center"
+        aria-label="Open Support Center"
+      >
+        <div class="pf-iconimg"><span class="pf-emoji">🛟</span></div>
+        <div class="pf-iconlabel">Support Center</div>
+      </li>
+      <li class="pf-icon" tabindex="0" role="button" data-osapp="cart" data-app-id="cart" aria-label="Open Cart">
+        <div class="pf-iconimg"><span class="pf-emoji">🛒</span></div>
+        <div class="pf-iconlabel">Cart</div>
+      </li>
+      <li class="pf-icon" tabindex="0" role="button" data-osapp="search" data-app-id="search" aria-label="Open Search">
+        <div class="pf-iconimg"><span class="pf-emoji">🔎</span></div>
+        <div class="pf-iconlabel">Search</div>
+      </li>
+
+      {%- if desktop_collection and desktop_collection.products != blank -%}
+        {%- for product in desktop_collection.products limit: icon_limit -%}
+          {%- assign file_label = '' -%}
+          {%- for t in product.tags -%}
+            {%- if t contains 'file-' -%}
+              {%- case t -%}
+                {%- when 'file-svg' -%}
+                  {%- assign file_label = 'SVG' -%}
+                {%- when 'file-stl' -%}
+                  {%- assign file_label = 'STL' -%}
+                {%- when 'file-pdf' -%}
+                  {%- assign file_label = 'PDF' -%}
+                {%- when 'file-plr' -%}
+                  {%- assign file_label = 'PLR' -%}
+                {%- when 'file-ebook' -%}
+                  {%- assign file_label = 'E-BOOK' -%}
+                {%- when 'file-tutorial' -%}
+                  {%- assign file_label = 'TUTORIAL' -%}
+                {%- when 'file-art' -%}
+                  {%- assign file_label = 'ART' -%}
+                {%- when 'file-print' -%}
+                  {%- assign file_label = 'PRINT' -%}
+                {%- when 'file-template' -%}
+                  {%- assign file_label = 'TEMPLATE' -%}
+                {%- when 'file-wallpaper' -%}
+                  {%- assign file_label = 'WALLPAPER' -%}
+                {%- when 'file-bundle' -%}
+                  {%- assign file_label = 'BUNDLE' -%}
+              {%- endcase -%}
+              {%- break -%}
+            {%- endif -%}
+          {%- endfor -%}
+
+          <li
+            class="pf-icon"
+            tabindex="0"
+            role="button"
+            data-url="{{ product.url }}"
+            data-title="{{ product.title | escape }}"
+            aria-label="Open {{ product.title | escape }}"
+          >
+            <div class="pf-iconimg">
+              {%- if product.featured_image -%}
+                {%- assign img = product.featured_image -%}
+                <img
+                  src="{{ img | image_url: width: 160 }}"
+                  width="{{ img.width }}"
+                  height="{{ img.height }}"
+                  alt="{{ product.title | escape }}"
+                  loading="lazy"
+                  decoding="async"
+                >
+              {%- else -%}
+                <span class="pf-emoji">📦</span>
+              {%- endif -%}
+
+              {%- if file_label != '' -%}
+                <span class="pf-iconbadge" aria-hidden="true">{{ file_label }}</span>
+              {%- endif -%}
+            </div>
+            <div class="pf-iconlabel">{{ product.title }}</div>
+          </li>
+        {%- endfor -%}
+      {%- endif -%}
+    </ol>
+  </main>
+
+  <nav class="pf-taskbar" data-taskbar aria-label="Taskbar">
+    <button class="pf-startbtn" type="button" data-start aria-label="Start" title="Start">
+      <span class="pf-startmark" aria-hidden="true">⊞</span>
+      <span class="pf-starttext">{{ settings.brand_name | escape }}</span>
+    </button>
+
+    <button
+      class="pf-taskbtn"
+      type="button"
+      data-osapp="search"
+      data-app-id="search"
+      aria-label="Search"
+      title="Search"
+    >
+      🔎
+    </button>
+
+    <ol class="pf-tasks" data-tasks aria-label="Open windows"></ol>
+
+    <button class="pf-taskbtn" type="button" data-osapp="cart" data-app-id="cart" aria-label="Cart" title="Cart">
+      🛒 <span class="pf-badge" data-cartbadge>0</span>
+    </button>
+
+    <div class="pf-clock" data-clock aria-label="Clock"></div>
+  </nav>
+
+  <div class="pf-startmenu" hidden data-startmenu role="menu" aria-label="Start menu">
+    <div class="pf-startmenu__inner">
+      <div class="pf-startmenu__rail" aria-label="Start rail">
+        <a class="pf-railbtn" href="{{ routes.root_url }}" data-oscmd="home" aria-label="Home" title="Home">🏠</a>
+        <a
+          class="pf-railbtn"
+          href="{{ routes.root_url }}?osapp=app-store"
+          data-osapp="app-store"
+          data-app-id="app-store"
+          data-title="App Store"
+          aria-label="App Store"
+          title="App Store"
+          >🛍️</a
+        >
+        <a
+          class="pf-railbtn"
+          href="{{ routes.root_url }}?osapp=settings"
+          data-osapp="settings"
+          data-app-id="settings"
+          data-title="Settings"
+          aria-label="Settings"
+          title="Settings"
+          >⚙️</a
+        >
+        <a
+          class="pf-railbtn"
+          href="{{ routes.account_url }}"
+          data-osapp="system"
+          data-app-id="system"
+          data-title="Account"
+          aria-label="Account"
+          title="Account"
+          >👤</a
+        >
+      </div>
+
+      <div class="pf-startmenu__apps" aria-label="All apps">
+        <div class="pf-startmenu__title">All apps</div>
+        {%- if start_menu.links.size > 0 -%}
+          <ul class="pf-menu pf-menu--apps">
+            {%- for link in start_menu.links -%}
+              <li class="pf-menu__item pf-menu__item--app" data-menuitem>
+                {%- if link.links.size > 0 -%}
+                  <button type="button" class="pf-menu__btn pf-menu__btn--app" data-flyoutbtn>
+                    <span class="pf-menu__label">{{ link.title }}</span>
+                    <span class="pf-menu__arrow">›</span>
+                  </button>
+                  <div class="pf-flyout" hidden data-flyout>
+                    <ul class="pf-menu pf-menu--flyout">
+                      {%- for sublink in link.links -%}
+                        <li class="pf-menu__item" data-menuitem>
+                          {%- if sublink.links.size > 0 -%}
+                            <button
+                              type="button"
+                              class="pf-menu__btn pf-menu__btn--sub"
+                              data-flyoutbtn
+                              data-url="{{ sublink.url }}"
+                              data-title="{{ sublink.title | escape }}"
+                            >
+                              <span class="pf-menu__label">{{ sublink.title }}</span>
+                              <span class="pf-menu__arrow">›</span>
+                            </button>
+                            <div class="pf-flyout pf-flyout--third" hidden data-flyout>
+                              <ul class="pf-menu pf-menu--flyout">
+                                {%- for cmd in sublink.links -%}
+                                  <li class="pf-menu__item">
+                                    <a
+                                      class="pf-menu__btn pf-menu__btn--cmd"
+                                      href="{{ cmd.url }}"
+                                      data-url="{{ cmd.url }}"
+                                      data-title="{{ cmd.title | escape }}"
+                                    >
+                                      <span class="pf-menu__label">{{ cmd.title }}</span>
+                                    </a>
+                                  </li>
+                                {%- endfor -%}
+                              </ul>
+                            </div>
+                          {%- else -%}
+                            <a
+                              class="pf-menu__btn pf-menu__btn--cmd"
+                              href="{{ sublink.url }}"
+                              data-url="{{ sublink.url }}"
+                              data-title="{{ sublink.title | escape }}"
+                            >
+                              <span class="pf-menu__label">{{ sublink.title }}</span>
+                            </a>
+                          {%- endif -%}
+                        </li>
+                      {%- endfor -%}
+                    </ul>
+                  </div>
+                {%- else -%}
+                  <a
+                    class="pf-menu__btn pf-menu__btn--app"
+                    href="{{ link.url }}"
+                    data-url="{{ link.url }}"
+                    data-title="{{ link.title | escape }}"
+                  >
+                    <span class="pf-menu__label">{{ link.title }}</span>
+                  </a>
+                {%- endif -%}
+              </li>
+            {%- endfor -%}
+          </ul>
+        {%- else -%}
+          <div class="pf-startmenu__empty">Add items to your Start menu navigation in Shopify.</div>
+        {%- endif -%}
+      </div>
+
+      <div class="pf-startmenu__pinned" aria-label="Pinned apps">
+        <div class="pf-startmenu__title">Featured</div>
+        <div class="pf-pins pf-pins--featured" data-startmenu-featured></div>
+        <div class="pf-startmenu__title">Pinned</div>
+        <div class="pf-pins" data-startmenu-pinned></div>
+      </div>
+    </div>
+  </div>
+
+  <template id="pf-tools-template">
+    {% render 'tools-window' %}
+  </template>
+
+  <template id="pf-appstore-template">
+    {% # theme-check-disable-next-line %}
+    {% render 'app-store-window' %}
+  </template>
+
+  <template id="pf-settings-template">
+    {% # theme-check-disable-next-line %}
+    {% render 'settings-window' %}
+  </template>
+
+  <template id="pf-vault-template">
+    {% # theme-check-disable-next-line %}
+    {% render 'vault-window' %}
+  </template>
+
+  <template id="pf-support-template">
+    {% render 'support-center-window', fallback_url: support_fallback_url %}
+  </template>
+
+  {%- assign pro_pass_product = settings.pro_pass_product -%}
+  {%- assign pro_pass_url = pro_pass_product.url | default: routes.all_products_collection_url -%}
+  <script type="application/json" data-app-entitlements>
+    {%- if customer and customer.metafields.phias_fab_os.app_entitlements != blank -%}
+      {{ customer.metafields.phias_fab_os.app_entitlements | json }}
+    {%- else -%}
+      {}
+    {%- endif -%}
+  </script>
+
+  <script type="application/json" data-customer-settings>
+    {%- if customer and customer.metafields.phias_fab_os.settings != blank -%}
+      {{ customer.metafields.phias_fab_os.settings | json }}
+    {%- else -%}
+      {}
+    {%- endif -%}
+  </script>
+
+  <script type="application/json" data-app-manifest>
+    {
+      "proPass": {
+        "entitlementKey": "pro_pass",
+        "unlockUrl": {{ pro_pass_url | json }},
+        "ctaLabel": "Start Pro Pass"
+      },
+      "apps": [
+        {
+          "id": "home",
+          "name": "Home",
+          "icon": "🏠",
+          "description": "Return to your desktop workspace.",
+          "category": "System",
+          "featured": true,
+          "pinnable": true,
+          "pinnedDefault": true,
+          "premium": false,
+          "actionType": "command",
+          "actionValue": "home"
+        },
+        {
+          "id": "shop",
+          "name": "Shop",
+          "icon": "🛍️",
+          "description": "Browse Digital Drops and Fab Goods in one hub.",
+          "category": "Store",
+          "featured": true,
+          "pinnable": true,
+          "pinnedDefault": true,
+          "premium": false,
+          "actionType": "osapp",
+          "actionValue": "shop"
+        },
+        {
+          "id": "support-center",
+          "name": "Support Center",
+          "icon": "🛟",
+          "description": "Get help with orders, downloads, and custom requests.",
+          "category": "Support",
+          "featured": true,
+          "pinnable": true,
+          "pinnedDefault": true,
+          "premium": false,
+          "actionType": "osapp",
+          "actionValue": "support-center"
+        },
+        {
+          "id": "app-store",
+          "name": "App Store",
+          "icon": "🛍️",
+          "description": "Discover new apps for your creative workflow.",
+          "category": "System",
+          "featured": true,
+          "pinnable": true,
+          "pinnedDefault": true,
+          "premium": false,
+          "actionType": "osapp",
+          "actionValue": "app-store"
+        },
+        {
+          "id": "settings",
+          "name": "Settings",
+          "icon": "⚙️",
+          "description": "Personalize your Phia's Fab OS experience.",
+          "category": "System",
+          "featured": true,
+          "pinnable": true,
+          "pinnedDefault": true,
+          "premium": false,
+          "actionType": "osapp",
+          "actionValue": "settings"
+        },
+        {
+          "id": "vault",
+          "name": "Digital Vault",
+          "icon": "🗄️",
+          "description": "Your downloads, licenses, and purchase history.",
+          "category": "Library",
+          "featured": true,
+          "pinnable": true,
+          "pinnedDefault": true,
+          "premium": false,
+          "actionType": "osapp",
+          "actionValue": "vault"
+        },
+        {
+          "id": "storefront",
+          "name": "Storefront",
+          "icon": "🛍️",
+          "description": "Browse the full storefront catalog.",
+          "category": "Store",
+          "featured": false,
+          "pinnable": true,
+          "pinnedDefault": true,
+          "premium": false,
+          "actionType": "osapp",
+          "actionValue": "storefront"
+        },
+        {
+          "id": "search",
+          "name": "Search",
+          "icon": "🔎",
+          "description": "Search the Phia's Fab catalog.",
+          "category": "System",
+          "featured": false,
+          "pinnable": true,
+          "pinnedDefault": true,
+          "premium": false,
+          "actionType": "osapp",
+          "actionValue": "search"
+        },
+        {
+          "id": "cart",
+          "name": "Cart",
+          "icon": "🛒",
+          "description": "View your cart and checkout.",
+          "category": "Store",
+          "featured": false,
+          "pinnable": true,
+          "pinnedDefault": false,
+          "premium": false,
+          "actionType": "osapp",
+          "actionValue": "cart"
+        },
+        {
+          "id": "tools",
+          "name": "Tools",
+          "icon": "🧰",
+          "description": "Utility tools for digital products.",
+          "category": "Tools",
+          "featured": false,
+          "pinnable": true,
+          "pinnedDefault": false,
+          "premium": false,
+          "actionType": "osapp",
+          "actionValue": "tools"
+        },
+        {
+          "id": "studio",
+          "name": "Studio",
+          "icon": "🧪",
+          "description": "Creative studio for SVG workflows.",
+          "category": "Creative",
+          "featured": false,
+          "pinnable": true,
+          "pinnedDefault": false,
+          "premium": false,
+          "actionType": "osapp",
+          "actionValue": "studio"
+        },
+        {
+          "id": "svg-studio-pro",
+          "name": "SVG Studio Pro",
+          "icon": "🧪",
+          "description": "Advanced SVG generator with pro presets.",
+          "category": "Creative",
+          "premium": true,
+          "pinnable": true,
+          "pinnedDefault": false,
+          "actionType": "placeholder",
+          "actionValue": "SVG Studio Pro"
+        },
+        {
+          "id": "mockup-generator",
+          "name": "Mockup Generator",
+          "icon": "🖼️",
+          "description": "Create product mockups in seconds.",
+          "category": "Creative",
+          "premium": true,
+          "pinnable": true,
+          "pinnedDefault": false,
+          "actionType": "placeholder",
+          "actionValue": "Mockup Generator"
+        },
+        {
+          "id": "decal-builder",
+          "name": "Decal Builder",
+          "icon": "✂️",
+          "description": "Layered decal templates and cut paths.",
+          "category": "Tools",
+          "premium": true,
+          "pinnable": true,
+          "pinnedDefault": false,
+          "actionType": "placeholder",
+          "actionValue": "Decal Builder"
+        }
+      ]
+    }
+  </script>
+
+  {%- assign digital_blocks = section.blocks | where: "type", "digital_category" -%}
+  {%- assign goods_blocks = section.blocks | where: "type", "goods_category" -%}
+  <script type="application/json" data-shop-config>
+    {
+      "digital": [
+        {%- for block in digital_blocks -%}
+          {
+            "id": {{ block.id | json }},
+            "label": {{ block.settings.label | json }},
+            "handle": {{ block.settings.collection | json }}
+          }{%- unless forloop.last -%},{%- endunless -%}
+        {%- endfor -%}
+      ],
+      "goods": [
+        {%- for block in goods_blocks -%}
+          {
+            "id": {{ block.id | json }},
+            "label": {{ block.settings.label | json }},
+            "handle": {{ block.settings.collection | json }}
+          }{%- unless forloop.last -%},{%- endunless -%}
+        {%- endfor -%}
+      ]
+    }
+  </script>
+
+  <div class="pf-windowlayer" data-windowlayer aria-label="Windows layer"></div>
+</div>
+
+{% schema %}
+{
+  "name": "Desktop OS",
+  "settings": [],
+  "blocks": [
+    {
+      "type": "digital_category",
+      "name": "Digital category",
+      "settings": [
+        {
+          "type": "text",
+          "id": "label",
+          "label": "Folder label",
+          "default": "Digital folder"
+        },
+        {
+          "type": "collection",
+          "id": "collection",
+          "label": "Collection"
+        }
+      ]
+    },
+    {
+      "type": "goods_category",
+      "name": "Fab Goods category",
+      "settings": [
+        {
+          "type": "text",
+          "id": "label",
+          "label": "Folder label",
+          "default": "Fab folder"
+        },
+        {
+          "type": "collection",
+          "id": "collection",
+          "label": "Collection"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Desktop OS"
+    }
+  ]
+}
+{% endschema %}

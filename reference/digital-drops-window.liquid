@@ -1,0 +1,141 @@
+{%- liquid
+  assign parent_handle = section.settings.parent_collection_handle | default: 'digital-drops' | strip
+  assign raw_handles = section.settings.folder_collection_handles | default: '' | split: ','
+  assign first_folder_handle = ''
+-%}
+
+<section
+  class="digital-drops"
+  data-digital-drops-root
+  data-section-id="{{ section.id }}"
+  hidden
+>
+  <template data-digital-drops-shell>
+    <div class="digital-drops__app" data-dd-app>
+      <header class="digital-drops__toolbar">
+        <button class="pf-winbtn pf-winbtn--ghost" type="button" data-dd-back disabled>Back</button>
+        <div class="digital-drops__breadcrumbs" data-dd-breadcrumbs>
+          <span class="digital-drops__crumb is-current">Digital Drops</span>
+        </div>
+        <label class="digital-drops__search">
+          <input class="pf-wininput" type="search" data-dd-search placeholder="Search files in folder">
+        </label>
+        <div class="digital-drops__view" role="group" aria-label="View mode">
+          <button class="pf-winbtn pf-winbtn--ghost is-active" type="button" data-dd-view="icons">Icons</button>
+          <button class="pf-winbtn pf-winbtn--ghost" type="button" data-dd-view="list">List</button>
+        </div>
+      </header>
+
+      <div class="digital-drops__status" data-dd-status hidden></div>
+
+      <div class="digital-drops__body">
+        <aside class="digital-drops__folders" data-dd-folders>
+          {%- for raw_handle in raw_handles -%}
+            {%- assign folder_handle = raw_handle | strip -%}
+            {%- if folder_handle != blank -%}
+              {%- assign folder_collection = collections[folder_handle] -%}
+              {%- if folder_collection != blank -%}
+                {%- if first_folder_handle == '' -%}
+                  {%- assign first_folder_handle = folder_handle -%}
+                {%- endif -%}
+                <button
+                  class="digital-drops__folder"
+                  type="button"
+                  data-dd-open-folder="{{ folder_collection.handle | escape }}"
+                  aria-label="Open folder {{ folder_collection.title | escape }}"
+                >
+                  <span class="digital-drops__folder-icon" aria-hidden="true">Folder</span>
+                  <span class="digital-drops__folder-name">{{ folder_collection.title }}</span>
+                </button>
+              {%- endif -%}
+            {%- endif -%}
+          {%- endfor -%}
+        </aside>
+
+        <div class="digital-drops__files" data-dd-files data-view="icons">
+          {%- if first_folder_handle != '' -%}
+            {%- assign first_folder_collection = collections[first_folder_handle] -%}
+            {%- if first_folder_collection != blank and first_folder_collection.products_count > 0 -%}
+              {%- for product in first_folder_collection.products limit: 24 -%}
+                {% render 'digital-drops-product-tile', product: product %}
+              {%- endfor -%}
+            {%- else -%}
+              <p class="digital-drops__empty">No files found in this folder yet.</p>
+            {%- endif -%}
+          {%- else -%}
+            <p class="digital-drops__empty">Configure folder collection handles in this section.</p>
+          {%- endif -%}
+        </div>
+      </div>
+    </div>
+  </template>
+
+  <script type="application/json" data-digital-drops-config>
+    {
+      "parentCollectionHandle": {{ parent_handle | json }},
+      "folderHandles": [
+        {%- assign first_item = true -%}
+        {%- for raw_handle in raw_handles -%}
+          {%- assign folder_handle = raw_handle | strip -%}
+          {%- if folder_handle != blank and collections[folder_handle] != blank -%}
+            {%- unless first_item -%},{%- endunless -%}
+            {{ folder_handle | json }}
+            {%- assign first_item = false -%}
+          {%- endif -%}
+        {%- endfor -%}
+      ],
+      "folders": [
+        {%- assign first_folder = true -%}
+        {%- for raw_handle in raw_handles -%}
+          {%- assign folder_handle = raw_handle | strip -%}
+          {%- if folder_handle != blank -%}
+            {%- assign folder_collection = collections[folder_handle] -%}
+            {%- if folder_collection != blank -%}
+              {%- unless first_folder -%},{%- endunless -%}
+              {
+                "handle": {{ folder_collection.handle | json }},
+                "title": {{ folder_collection.title | json }},
+                "url": {{ folder_collection.url | json }},
+                "productsCount": {{ folder_collection.products_count | json }}
+              }
+              {%- assign first_folder = false -%}
+            {%- endif -%}
+          {%- endif -%}
+        {%- endfor -%}
+      ],
+      "firstFolderHandle": {{ first_folder_handle | json }}
+    }
+  </script>
+
+  <noscript>
+    <div class="digital-drops__noscript">
+      <h2>Digital Drops</h2>
+      <p>Enable JavaScript to browse folders, open product windows, and add to cart inside the OS.</p>
+      {%- if first_folder_handle != '' -%}
+        <p>Open folder: {{ collections[first_folder_handle].title }}</p>
+      {%- endif -%}
+    </div>
+  </noscript>
+</section>
+
+{% schema %}
+{
+  "name": "Digital Drops Window",
+  "settings": [
+    {
+      "type": "text",
+      "id": "parent_collection_handle",
+      "label": "Parent collection handle",
+      "default": "digital-drops",
+      "info": "Top-level collection handle used for breadcrumbs/context."
+    },
+    {
+      "type": "textarea",
+      "id": "folder_collection_handles",
+      "label": "Folder collection handles",
+      "default": "ebooks, templates, presets, svg-packs",
+      "info": "Comma-separated collection handles used as Digital Drops folders."
+    }
+  ]
+}
+{% endschema %}

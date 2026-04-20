@@ -27,12 +27,15 @@ export default defineConfig([
     },
   },
   {
-    files: ['server/**/*.js', '*.config.js'],
+    files: ['server/**/*.js', '*.config.js', 'tests/**/*.js'],
     extends: [js.configs.recommended],
     languageOptions: {
       ecmaVersion: 'latest',
       sourceType: 'module',
-      globals: globals.node,
+      globals: {
+        ...globals.node,
+        ...globals.browser,
+      },
     },
   },
 ])

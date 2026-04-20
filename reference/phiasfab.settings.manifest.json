@@ -1,0 +1,352 @@
+{
+  "categories": [
+    { "id": "personalization", "name": "Personalization", "icon": "🎨", "order": 1 },
+    { "id": "effects", "name": "Effects & Performance", "icon": "⚡", "order": 2 },
+    { "id": "taskbar", "name": "Taskbar & Start", "icon": "🧭", "order": 3 },
+    { "id": "windows", "name": "Windows", "icon": "🗔", "order": 4 },
+    { "id": "accessibility", "name": "Accessibility", "icon": "♿", "order": 5 },
+    { "id": "advanced", "name": "Advanced", "icon": "🧪", "order": 6 }
+  ],
+  "settings": [
+    {
+      "id": "themeMode",
+      "categoryId": "personalization",
+      "label": "Theme mode",
+      "description": "Switch between Dark, Light, and Neon themes.",
+      "type": "select",
+      "default": "dark",
+      "options": [
+        { "label": "Dark", "value": "dark" },
+        { "label": "Light", "value": "light" },
+        { "label": "Neon", "value": "neon" }
+      ],
+      "apply": { "targets": ["osState"], "key": "theme" }
+    },
+    {
+      "id": "accentColor",
+      "categoryId": "personalization",
+      "label": "Accent color",
+      "description": "Set the accent used by focused controls and highlights.",
+      "type": "color",
+      "default": "#1e63c5",
+      "apply": { "targets": ["cssVar"], "key": "--pf-accent" }
+    },
+    {
+      "id": "wallpaper",
+      "categoryId": "personalization",
+      "label": "Wallpaper",
+      "description": "Choose a built-in desktop wallpaper style.",
+      "type": "select",
+      "default": "default",
+      "options": [
+        { "label": "Default", "value": "default" },
+        { "label": "Aurora", "value": "aurora" },
+        { "label": "Sunset", "value": "sunset" },
+        { "label": "Midnight", "value": "midnight" },
+        { "label": "Grid", "value": "grid" }
+      ],
+      "apply": { "targets": ["osState"], "key": "wallpaper" }
+    },
+    {
+      "id": "iconSize",
+      "categoryId": "personalization",
+      "label": "Icon size",
+      "description": "Scale desktop icons for denser or larger layouts.",
+      "type": "select",
+      "default": "medium",
+      "options": [
+        { "label": "Small", "value": "small" },
+        { "label": "Medium", "value": "medium" },
+        { "label": "Large", "value": "large" }
+      ],
+      "apply": { "targets": ["osState"], "key": "icon-size" }
+    },
+    {
+      "id": "uiScale",
+      "categoryId": "personalization",
+      "label": "UI scale",
+      "description": "Adjust global interface scale from 90% to 120%.",
+      "type": "range",
+      "default": 100,
+      "min": 90,
+      "max": 120,
+      "step": 1,
+      "apply": { "targets": ["cssVar"], "key": "--pf-ui-scale" }
+    },
+    {
+      "id": "cornerRadius",
+      "categoryId": "personalization",
+      "label": "Rounded corners",
+      "description": "Set the corner radius used across windows and controls.",
+      "type": "range",
+      "default": 8,
+      "min": 0,
+      "max": 18,
+      "step": 1,
+      "apply": { "targets": ["cssVar"], "key": "--pf-radius" }
+    },
+    {
+      "id": "reduceMotion",
+      "categoryId": "effects",
+      "label": "Reduce motion",
+      "description": "Disable most animations and transitions.",
+      "type": "toggle",
+      "default": false,
+      "apply": { "targets": ["bodyClass", "osState"], "key": "pf-reduce-motion", "valueMap": { "true": "on", "false": "off" } }
+    },
+    {
+      "id": "windowBlur",
+      "categoryId": "effects",
+      "label": "Window glass blur",
+      "description": "Enable translucent blur on taskbar and start menu.",
+      "type": "toggle",
+      "default": true,
+      "apply": { "targets": ["osState"], "key": "window-blur", "valueMap": { "true": "on", "false": "off" } }
+    },
+    {
+      "id": "shadowsEnabled",
+      "categoryId": "effects",
+      "label": "Shadows",
+      "description": "Show or hide drop shadows on windows and menus.",
+      "type": "toggle",
+      "default": true,
+      "apply": { "targets": ["osState"], "key": "window-shadows", "valueMap": { "true": "on", "false": "off" } }
+    },
+    {
+      "id": "shadowIntensity",
+      "categoryId": "effects",
+      "label": "Shadow intensity",
+      "description": "Fine tune the depth of interface shadows.",
+      "type": "range",
+      "default": 70,
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "dependsOn": { "id": "shadowsEnabled", "equals": true },
+      "apply": { "targets": ["cssVar"], "key": "--pf-shadow-opacity" }
+    },
+    {
+      "id": "perfMode",
+      "categoryId": "effects",
+      "label": "Performance mode",
+      "description": "Favor responsiveness by reducing visual effects.",
+      "type": "toggle",
+      "default": false,
+      "apply": { "targets": ["osState"], "key": "perf-mode", "valueMap": { "true": "on", "false": "off" } }
+    },
+    {
+      "id": "taskbarPosition",
+      "categoryId": "taskbar",
+      "label": "Taskbar position",
+      "description": "Move taskbar to bottom, top, or left side.",
+      "type": "select",
+      "default": "bottom",
+      "options": [
+        { "label": "Bottom", "value": "bottom" },
+        { "label": "Top", "value": "top" },
+        { "label": "Left", "value": "left" }
+      ],
+      "apply": { "targets": ["osState"], "key": "taskbar-position" }
+    },
+    {
+      "id": "taskbarCompact",
+      "categoryId": "taskbar",
+      "label": "Compact taskbar",
+      "description": "Use a thinner taskbar to reclaim workspace.",
+      "type": "toggle",
+      "default": false,
+      "apply": { "targets": ["osState"], "key": "taskbar-compact", "valueMap": { "true": "on", "false": "off" } }
+    },
+    {
+      "id": "taskbarAutohide",
+      "categoryId": "taskbar",
+      "label": "Auto-hide taskbar",
+      "description": "Hide the taskbar until you hover near the edge.",
+      "type": "toggle",
+      "default": false,
+      "apply": { "targets": ["osState"], "key": "taskbar-autohide", "valueMap": { "true": "on", "false": "off" } }
+    },
+    {
+      "id": "startMenuStyle",
+      "categoryId": "taskbar",
+      "label": "Start menu style",
+      "description": "Choose compact or expanded start menu layout.",
+      "type": "select",
+      "default": "expanded",
+      "options": [
+        { "label": "Expanded", "value": "expanded" },
+        { "label": "Compact", "value": "compact" }
+      ],
+      "apply": { "targets": ["osState"], "key": "start-menu-style" }
+    },
+    {
+      "id": "clockFormat",
+      "categoryId": "taskbar",
+      "label": "Clock format",
+      "description": "Display taskbar clock in 24-hour or 12-hour format.",
+      "type": "select",
+      "default": "24h",
+      "options": [
+        { "label": "24-hour", "value": "24h" },
+        { "label": "12-hour", "value": "12h" }
+      ],
+      "apply": { "targets": ["osState"], "key": "clock-format" }
+    },
+    {
+      "id": "defaultWindowSize",
+      "categoryId": "windows",
+      "label": "Default window size",
+      "description": "Set opening size for new windows.",
+      "type": "select",
+      "default": "medium",
+      "options": [
+        { "label": "Compact", "value": "compact" },
+        { "label": "Medium", "value": "medium" },
+        { "label": "Large", "value": "large" }
+      ],
+      "apply": { "targets": ["osState"], "key": "default-window-size" }
+    },
+    {
+      "id": "snapWindows",
+      "categoryId": "windows",
+      "label": "Snap windows",
+      "description": "Snap windows to edges while dragging.",
+      "type": "toggle",
+      "default": true,
+      "apply": { "targets": ["osState"], "key": "snap-windows", "valueMap": { "true": "on", "false": "off" } }
+    },
+    {
+      "id": "uiSounds",
+      "categoryId": "windows",
+      "label": "UI sounds",
+      "description": "Play subtle sounds for window and setting actions.",
+      "type": "toggle",
+      "default": false,
+      "apply": { "targets": ["osState"], "key": "ui-sounds", "valueMap": { "true": "on", "false": "off" } }
+    },
+    {
+      "id": "highContrast",
+      "categoryId": "accessibility",
+      "label": "High contrast",
+      "description": "Increase contrast for stronger readability.",
+      "type": "toggle",
+      "default": false,
+      "apply": { "targets": ["osState"], "key": "high-contrast", "valueMap": { "true": "on", "false": "off" } }
+    },
+    {
+      "id": "largeText",
+      "categoryId": "accessibility",
+      "label": "Large text",
+      "description": "Scale text labels throughout the desktop interface.",
+      "type": "toggle",
+      "default": false,
+      "apply": { "targets": ["osState"], "key": "large-text", "valueMap": { "true": "on", "false": "off" } }
+    },
+    {
+      "id": "showTooltips",
+      "categoryId": "accessibility",
+      "label": "Show helper descriptions",
+      "description": "Show descriptive helper text under each setting.",
+      "type": "toggle",
+      "default": true,
+      "apply": { "targets": ["osState"], "key": "help-text", "valueMap": { "true": "on", "false": "off" } }
+    },
+    {
+      "id": "quickSearchShortcut",
+      "categoryId": "advanced",
+      "label": "Quick search shortcut",
+      "description": "Keyboard shortcut to open Search (example: Ctrl+K).",
+      "type": "keybind",
+      "default": "Ctrl+K",
+      "apply": { "targets": ["osState"], "key": "quick-search-shortcut" }
+    },
+    {
+      "id": "clearTransientState",
+      "categoryId": "advanced",
+      "label": "Clear transient app cache",
+      "description": "Clears app store pin/install cache in this browser.",
+      "type": "button",
+      "default": "",
+      "apply": { "targets": ["osState"], "key": "clear-transient-state" }
+    }
+  ],
+  "presets": [
+    {
+      "id": "performance",
+      "name": "Performance",
+      "description": "Low effects with high responsiveness.",
+      "values": {
+        "themeMode": "dark",
+        "reduceMotion": true,
+        "windowBlur": false,
+        "shadowsEnabled": false,
+        "shadowIntensity": 10,
+        "perfMode": true,
+        "taskbarCompact": true,
+        "taskbarAutohide": false,
+        "uiScale": 100,
+        "iconSize": "small"
+      }
+    },
+    {
+      "id": "creator",
+      "name": "Creator",
+      "description": "Balanced visuals for design-heavy sessions.",
+      "values": {
+        "themeMode": "dark",
+        "accentColor": "#8257ff",
+        "wallpaper": "aurora",
+        "windowBlur": true,
+        "shadowsEnabled": true,
+        "shadowIntensity": 76,
+        "uiScale": 102,
+        "defaultWindowSize": "large"
+      }
+    },
+    {
+      "id": "minimal",
+      "name": "Minimal",
+      "description": "Clean and distraction-free interface.",
+      "values": {
+        "themeMode": "light",
+        "accentColor": "#1e63c5",
+        "wallpaper": "default",
+        "iconSize": "small",
+        "cornerRadius": 4,
+        "windowBlur": false,
+        "shadowsEnabled": false,
+        "taskbarCompact": true,
+        "showTooltips": false
+      }
+    },
+    {
+      "id": "neon",
+      "name": "Neon",
+      "description": "High-energy futuristic style.",
+      "values": {
+        "themeMode": "neon",
+        "accentColor": "#00e2ff",
+        "wallpaper": "grid",
+        "windowBlur": true,
+        "shadowsEnabled": true,
+        "shadowIntensity": 90,
+        "iconSize": "large",
+        "cornerRadius": 10
+      }
+    },
+    {
+      "id": "accessibility",
+      "name": "Accessibility",
+      "description": "Visibility and motion-safe defaults.",
+      "values": {
+        "themeMode": "light",
+        "highContrast": true,
+        "largeText": true,
+        "showTooltips": true,
+        "reduceMotion": true,
+        "uiScale": 110,
+        "clockFormat": "12h"
+      }
+    }
+  ]
+}
