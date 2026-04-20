@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="{{ request.locale.iso_code }}">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>
+      {{ page_title }}
+      {% if current_tags %} – {{ current_tags | join: ', ' }}{% endif %}
+      {% if current_page != 1 %} – Page {{ current_page }}{% endif %}
+      {% unless page_title contains shop.name %} – {{ shop.name }}{% endunless %}
+    </title>
+    {{ content_for_header }}
+    {{ 'desktop-os.css' | asset_url | stylesheet_tag }}
+    {% # theme-check-disable-next-line MissingAsset %}
+    {{ 'os-shop.css' | asset_url | stylesheet_tag }}
+    {{ 'tools.css' | asset_url | stylesheet_tag }}
+    {{ 'pf-badges.css' | asset_url | stylesheet_tag }}
+    <script src="{{ 'three.r134.min.js' | asset_url }}" defer></script>
+    <script src="{{ 'vanta.dots.min.js' | asset_url }}" defer></script>
+    <script src="{{ 'os-settings.js' | asset_url }}" defer></script>
+    <script src="{{ 'desktop-os.js' | asset_url }}" defer></script>
+    {% # theme-check-disable-next-line MissingAsset %}
+    <script src="{{ 'os-shop.js' | asset_url }}" defer></script>
+    <script src="{{ 'digital-drops.js' | asset_url }}" defer></script>
+    <script src="{{ 'tools.js' | asset_url }}" defer></script>
+  </head>
+  <body>
+    {{ content_for_layout }}
+    {% section 'digital-drops-window' %}
+  </body>
+</html>

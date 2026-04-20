@@ -1,0 +1,5 @@
+await import("../src/components/os/windowManagerState.test.js")
+await import("../src/lib/cryptoReview.test.js")
+await import("../src/lib/contactSubmission.test.js")
+await import("../server/cryptoPayments.test.js")
+await import("../server/cryptoRoutes.test.js")

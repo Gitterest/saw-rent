@@ -1,0 +1,1419 @@
+:root{
+  --pf-accent:#c9a54e;
+  --pf-accent-hover:#d4b461;
+  --pf-accent-subtle:rgba(201,165,78,0.10);
+  --pf-bg:#0d0d0f;
+  --pf-panel:#161619;
+  --pf-panel2:#1c1c20;
+  --pf-border:#2a2a2f;
+  --pf-text:#f1f1ef;
+  --pf-muted:#b7b7b2;
+  --pf-text-dim:#7a7a75;
+  --pf-shadow:0 18px 40px rgba(0,0,0,.5);
+  --pf-danger:#a04040;
+  --pf-danger-bg:rgba(160,64,64,0.10);
+  --pf-success:#4a8a5c;
+  --pf-success-bg:rgba(74,138,92,0.10);
+  --pf-taskbar-height:48px;
+  --pf-z-window:2000;
+  --pf-z-taskbar:6000;
+  --pf-z-start:7000;
+}
+
+*{box-sizing:border-box;}
+html,body{height:100%; margin:0; font-family:"Segoe UI",system-ui,-apple-system,Roboto,Helvetica,Arial,sans-serif; background:#000; overflow:hidden;}
+button{font-family:inherit}
+
+.pf-os{position:fixed; inset:0; background:var(--pf-bg); color:var(--pf-text); user-select:none;}
+.pf-os[data-theme="light"]{
+  --pf-bg:#1a1a1e;
+  --pf-text:#f1f1ef;
+  --pf-muted:#9a9a95;
+  --pf-panel:#222226;
+  --pf-panel2:#28282d;
+  --pf-border:#35353b;
+}
+.pf-os[data-theme="light"] .pf-taskbar{
+  background:rgba(22,22,25,.92);
+  border-top:1px solid var(--pf-border);
+}
+.pf-os[data-wallpaper="aurora"] .pf-wallpaper{background:linear-gradient(180deg, #1a1a1e, #0d0d0f 70%);}
+.pf-os[data-wallpaper="sunset"] .pf-wallpaper{background:linear-gradient(180deg, #1e1614, #0d0d0f 70%);}
+.pf-os[data-wallpaper="midnight"] .pf-wallpaper{background:linear-gradient(180deg, #0a0a0d, #050507 70%);}
+.pf-os[data-density="compact"] .pf-taskbar{height:44px;}
+.pf-os[data-density="compact"] .pf-startbtn{height:30px;}
+.pf-os[data-density="compact"] .pf-taskbtn{height:28px;}
+.pf-os[data-density="compact"] .pf-win__bar{height:30px;}
+.pf-os[data-density="compact"] .pf-win__body{height:calc(100% - 30px); padding:12px;}
+.pf-wallpaper{position:absolute; inset:0; z-index:-2; background:#0d0d0f;}
+.pf-wallpaper img{position:absolute; inset:0; width:100%; height:100%; object-fit:cover; opacity:.4; filter:saturate(.6) contrast(1.05);}
+.pf-wallpaper::after{content:""; position:absolute; inset:0; background:linear-gradient(180deg, rgba(0,0,0,.2), rgba(0,0,0,.5));}
+.pf-os[data-vanta="dots"] .pf-wallpaper{background:#0d0d0f;}
+.pf-os[data-vanta="dots"] .pf-wallpaper img{display:none;}
+.pf-os[data-vanta="dots"] .pf-wallpaper::after{background:none;}
+
+.pf-desktop{position:absolute; inset:0 0 var(--pf-taskbar-height) 0; padding:10px;}
+.pf-icons{display:grid; grid-auto-flow:column; grid-template-rows:repeat(auto-fill, 74px); grid-auto-columns:92px; gap:10px; align-content:start; list-style:none; margin:0; padding:0;}
+.pf-icon{border-radius:3px; padding:8px 6px; text-align:center; background:transparent; border:1px solid transparent; outline:0; cursor:pointer;}
+.pf-icon:hover,.pf-icon:focus{background:rgba(201,165,78,.08); border-color:rgba(201,165,78,.22);}
+.pf-iconimg{height:44px; display:flex; align-items:center; justify-content:center; margin-bottom:6px; position:relative;}
+.pf-iconimg img{width:44px; height:44px; border-radius:3px; object-fit:cover; display:block;}
+.pf-emoji{font-size:28px;}
+.pf-iconlabel{font-size:11px; line-height:1.1; color:var(--pf-text); display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; padding:0 2px;}
+@media (min-width: 1025px){
+  .pf-icons{position:relative;}
+  .pf-icon{position:absolute;}
+}
+
+.pf-taskbar{
+  position:fixed;
+  bottom:0;
+  left:0;
+  right:0;
+  height:var(--pf-taskbar-height);
+  background:rgba(13,13,15,.94);
+  border-top:1px solid var(--pf-border);
+  box-shadow:0 -8px 24px rgba(0,0,0,.4);
+  backdrop-filter:blur(8px);
+  display:flex;
+  align-items:center;
+  gap:6px;
+  padding:0 8px;
+  z-index:var(--pf-z-taskbar);
+}
+.pf-startbtn{
+  height:34px;
+  border-radius:4px;
+  border:1px solid var(--pf-border);
+  background:rgba(201,165,78,.08);
+  color:var(--pf-text);
+  padding:0 12px;
+  display:flex;
+  align-items:center;
+  gap:8px;
+  cursor:pointer;
+}
+.pf-startbtn:hover{border-color:var(--pf-accent); background:rgba(201,165,78,.14);}
+.pf-startbtn--active{background:var(--pf-accent); border-color:var(--pf-accent); color:#0d0d0f;}
+.pf-startmark{color:var(--pf-accent); font-weight:800;}
+.pf-starttext{font-size:12px; font-weight:700; letter-spacing:.2px;}
+
+.pf-taskbtn{
+  height:30px;
+  min-width:32px;
+  border-radius:4px;
+  border:1px solid var(--pf-border);
+  background:rgba(255,255,255,.04);
+  color:var(--pf-text);
+  padding:0 10px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:6px;
+  cursor:pointer;
+}
+.pf-taskbtn:hover{background:rgba(201,165,78,.10); border-color:rgba(201,165,78,.3);}
+
+.pf-badge{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  min-width:18px;
+  height:18px;
+  padding:0 6px;
+  border-radius:10px;
+  background:var(--pf-accent);
+  border:1px solid rgba(201,165,78,.5);
+  color:#0d0d0f;
+  font-size:11px;
+}
+
+.pf-tasks{
+  display:flex;
+  gap:6px;
+  list-style:none;
+  margin:0 6px;
+  padding:0;
+  flex:1;
+  overflow-x:auto;
+  overflow-y:hidden;
+  align-items:center;
+}
+.pf-task{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  height:30px;
+  border-radius:4px;
+  border:1px solid var(--pf-border);
+  background:rgba(255,255,255,.04);
+  color:var(--pf-text);
+  padding:0 10px;
+  max-width:240px;
+  flex:0 0 auto;
+}
+.pf-task[aria-selected="true"]{border-color:var(--pf-accent); box-shadow:inset 0 0 0 1px rgba(201,165,78,.25);}
+.pf-task__title{font-size:12px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:170px;}
+.pf-task__min{margin-left:auto; opacity:.85; font-size:12px;}
+.pf-task:hover{background:rgba(201,165,78,.08);}
+
+.pf-clock{font-size:12px; color:var(--pf-muted); padding:0 6px; white-space:nowrap;}
+
+.pf-startmenu{
+  position:fixed;
+  bottom:calc(var(--pf-taskbar-height) + 4px);
+  left:6px;
+  width:min(740px, calc(100vw - 12px));
+  background:var(--pf-panel);
+  border:1px solid var(--pf-border);
+  border-radius:6px;
+  box-shadow:var(--pf-shadow);
+  z-index:var(--pf-z-start);
+  color:var(--pf-text);
+}
+.pf-startmenu__inner{
+  display:grid;
+  grid-template-columns:64px 220px minmax(260px, 1fr);
+  min-height:360px;
+  max-height:calc(100vh - var(--pf-taskbar-height) - 24px);
+}
+.pf-startmenu__rail{
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+  padding:12px 8px;
+  background:#0d0d0f;
+  border-right:1px solid var(--pf-border);
+}
+.pf-railbtn{
+  width:44px;
+  height:44px;
+  border-radius:8px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  text-decoration:none;
+  color:var(--pf-text);
+  background:rgba(255,255,255,.05);
+  border:1px solid var(--pf-border);
+}
+.pf-railbtn:hover,.pf-railbtn:focus{background:rgba(201,165,78,.12); border-color:rgba(201,165,78,.3); outline:0;}
+.pf-startmenu__apps{padding:12px 10px; border-right:1px solid var(--pf-border); overflow:auto;}
+.pf-startmenu__pinned{padding:12px;}
+.pf-startmenu__title{
+  font-size:12px;
+  font-weight:700;
+  text-transform:uppercase;
+  letter-spacing:.14em;
+  color:var(--pf-muted);
+  margin-bottom:8px;
+}
+
+.pf-menu{list-style:none; margin:0; padding:0;}
+.pf-menu__item{position:relative;}
+.pf-menu__btn{
+  width:100%;
+  text-align:left;
+  border:1px solid transparent;
+  background:transparent;
+  color:var(--pf-text);
+  padding:8px 10px;
+  border-radius:6px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  cursor:pointer;
+  text-decoration:none;
+}
+.pf-menu__btn:hover,.pf-menu__btn:focus{background:rgba(201,165,78,.08); border-color:var(--pf-accent); outline:0;}
+.pf-menu__label{font-size:13px;}
+.pf-menu__arrow{opacity:.55;}
+.pf-menu__btn--app{font-weight:600;}
+.pf-menu__btn--cmd{justify-content:flex-start;}
+
+.pf-flyout{
+  position:absolute;
+  top:0;
+  left:calc(100% - 8px);
+  width:300px;
+  background:var(--pf-panel);
+  border:1px solid var(--pf-border);
+  border-radius:6px;
+  box-shadow:var(--pf-shadow);
+  padding:10px;
+  z-index:calc(var(--pf-z-start) + 1);
+  color:var(--pf-text);
+}
+.pf-flyout--third{left:calc(100% - 8px); top:0; width:280px;}
+.pf-menu--flyout .pf-menu__btn{padding:9px 10px;}
+.pf-startmenu__empty{padding:14px; color:var(--pf-muted); font-size:13px;}
+
+.pf-pins{
+  display:grid;
+  grid-template-columns:repeat(auto-fill, minmax(120px, 1fr));
+  gap:10px;
+}
+.pf-pins--featured{margin-bottom:12px;}
+.pf-tile{
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+  padding:10px;
+  min-height:92px;
+  border-radius:8px;
+  border:1px solid var(--pf-border);
+  background:var(--pf-panel2);
+  color:var(--pf-text);
+  text-decoration:none;
+  box-shadow:0 6px 18px rgba(0,0,0,.2);
+  position:relative;
+}
+.pf-tile:hover,.pf-tile:focus{border-color:var(--pf-accent); box-shadow:0 8px 20px rgba(0,0,0,.3); outline:0;}
+.pf-tile--wide{grid-column:span 2;}
+.pf-tile__icon{font-size:20px;}
+.pf-tile__label{font-size:13px; font-weight:600;}
+.pf-tile--locked{opacity:.75;}
+.pf-tile__badge{
+  position:absolute;
+  top:8px;
+  right:8px;
+  font-size:10px;
+  padding:2px 6px;
+  border-radius:999px;
+  background:var(--pf-danger-bg);
+  border:1px solid rgba(160,64,64,.3);
+  color:#e07070;
+}
+
+.pf-windowlayer{position:absolute; inset:0 0 var(--pf-taskbar-height) 0; pointer-events:none; z-index:var(--pf-z-window);}
+
+.pf-win{position:absolute; width:min(900px, calc(100vw - 24px)); height:min(600px, calc(100vh - var(--pf-taskbar-height) - 24px));
+  left:60px; top:60px; background:var(--pf-panel); border:1px solid var(--pf-border);
+  border-radius:6px; box-shadow:var(--pf-shadow); overflow:hidden; pointer-events:auto; color:var(--pf-text);
+}
+.pf-win[aria-hidden="true"]{display:none;}
+.pf-win__bar{height:34px; display:flex; align-items:center; gap:8px; padding:0 10px;
+  background:#111114;
+  border-bottom:1px solid var(--pf-border);
+}
+.pf-win--active .pf-win__bar{background:#131316;}
+.pf-win__title{font-size:12px; font-weight:700; color:var(--pf-text); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; flex:1; letter-spacing:.02em;}
+.pf-win__controls{display:flex; gap:6px;}
+.pf-win__ctrl{width:30px; height:24px; border-radius:4px; border:1px solid var(--pf-border); background:var(--pf-panel2); color:var(--pf-muted); cursor:pointer; font-size:12px; line-height:1;}
+.pf-win__ctrl:hover{background:rgba(201,165,78,.10); border-color:rgba(201,165,78,.3); color:var(--pf-accent);}
+.pf-win__ctrl--close{background:rgba(160,64,64,.12); border-color:rgba(160,64,64,.3); color:#c06060;}
+.pf-win__ctrl--close:hover{background:rgba(160,64,64,.22); color:#e07070;}
+
+.pf-win__body{height:calc(100% - 34px); overflow:auto; padding:16px; color:var(--pf-text);}
+.pf-win__body a{color:var(--pf-accent);}
+.pf-win__body img{max-width:100%; height:auto;}
+
+.pf-wincontent{max-width:100%;}
+.pf-winheader{margin-bottom:12px;}
+.pf-wintitle{margin:0 0 8px 0; font-size:18px; letter-spacing:.02em;}
+.pf-windesc{color:var(--pf-muted); font-size:13px; line-height:1.45;}
+.pf-winprice{font-weight:700; margin-bottom:10px;}
+.pf-winrow{display:flex; gap:10px; align-items:center; margin:10px 0;}
+.pf-winlabel{font-size:13px; color:var(--pf-muted);}
+.pf-wininput{background:#111114; border:1px solid var(--pf-border); color:var(--pf-text); border-radius:0; padding:8px 10px; outline:0;}
+.pf-wininput:focus{border-color:var(--pf-accent); box-shadow:0 0 0 2px rgba(201,165,78,.15);}
+.pf-winbtn{border:1px solid var(--pf-accent); background:rgba(201,165,78,.10); color:var(--pf-text); border-radius:0; padding:8px 10px; cursor:pointer; font-weight:700;}
+.pf-winbtn:hover{background:rgba(201,165,78,.18); box-shadow:0 2px 8px rgba(0,0,0,.2);}
+.pf-winbtn--ghost{border-color:var(--pf-border); background:var(--pf-panel2);}
+.pf-winbtn--ghost:hover{background:rgba(255,255,255,.06); border-color:rgba(201,165,78,.3);}
+.pf-winbtn:disabled{
+  border-color:var(--pf-border);
+  background:var(--pf-panel2);
+  color:var(--pf-text-dim);
+  cursor:default;
+  box-shadow:none;
+  opacity:1;
+}
+
+.pf-statusbar{
+  position: sticky;
+  bottom: -14px;
+  margin: 14px -14px -14px -14px;
+  padding: 6px 10px;
+  background: #111114;
+  border-top: 1px solid var(--pf-border);
+  color: var(--pf-muted);
+  font-size: 12px;
+}
+.pf-statusbar--error{
+  background: rgba(160,64,64,.12);
+  border-top-color: rgba(160,64,64,.3);
+  color:#e07070;
+}
+
+.pf-grid{display:grid; grid-template-columns:repeat(auto-fill, minmax(180px, 1fr)); gap:12px;}
+.pf-card{border:1px solid var(--pf-border); background:var(--pf-panel2); border-radius:0; overflow:hidden; color:var(--pf-text); padding:0; cursor:pointer; text-align:left;}
+.pf-card:hover{border-color:var(--pf-accent); background:rgba(201,165,78,.06);}
+.pf-card img{width:100%; height:140px; object-fit:cover; display:block;}
+.pf-card__meta{padding:10px;}
+.pf-card__title{font-size:13px; font-weight:650; margin-bottom:4px;}
+.pf-card__price{font-size:12px; color:var(--pf-muted);}
+
+/* Support Center */
+.pf-support__grid{
+  display:grid;
+  grid-template-columns:minmax(260px, 1.2fr) minmax(220px, .8fr);
+  gap:14px;
+}
+.pf-support__panel{
+  border:1px solid var(--pf-border);
+  border-radius:6px;
+  background:var(--pf-panel2);
+  padding:12px;
+}
+.pf-support__panel--form{background:var(--pf-panel);}
+.pf-support__title{margin:0 0 8px 0; font-size:14px;}
+.pf-support__note{font-size:12px; color:var(--pf-muted); margin-bottom:10px;}
+.pf-support__fields{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:10px;
+}
+.pf-support__field--full{grid-column:1 / -1;}
+.pf-support__textarea{min-height:120px; resize:vertical;}
+.pf-support__success{
+  border:1px solid rgba(74,138,92,.3);
+  background:var(--pf-success-bg);
+  color:#7cc08a;
+  border-radius:4px;
+  padding:8px 10px;
+  margin-bottom:10px;
+  font-size:12px;
+}
+.pf-support__error{
+  border:1px solid rgba(160,64,64,.3);
+  background:var(--pf-danger-bg);
+  color:#e07070;
+  border-radius:4px;
+  padding:8px 10px;
+  margin-bottom:10px;
+  font-size:12px;
+}
+.pf-support__list{list-style:none; padding:0; margin:0; display:flex; flex-direction:column; gap:8px;}
+.pf-support__list a{color:var(--pf-accent); text-decoration:none;}
+.pf-support__list a:hover{text-decoration:underline;}
+
+/* App Store */
+.pf-appstore__controls{
+  display:grid;
+  grid-template-columns:minmax(200px, 1fr) 180px auto;
+  gap:10px;
+  align-items:end;
+  margin-bottom:14px;
+}
+.pf-appstore__search,.pf-appstore__filter{display:flex; flex-direction:column; gap:6px;}
+.pf-appstore__section{margin-top:10px;}
+.pf-appstore__sectiontitle{font-size:12px; font-weight:700; text-transform:uppercase; letter-spacing:.14em; color:var(--pf-muted); margin-bottom:8px;}
+.pf-appstore__grid{display:grid; grid-template-columns:repeat(auto-fill, minmax(220px, 1fr)); gap:12px;}
+.pf-appstore__empty{padding:12px; border:1px dashed var(--pf-border); border-radius:6px; color:var(--pf-muted); font-size:12px;}
+
+.pf-appcard{
+  border:1px solid var(--pf-border);
+  border-radius:8px;
+  background:var(--pf-panel2);
+  padding:12px;
+  display:grid;
+  grid-template-columns:44px 1fr;
+  gap:10px;
+  position:relative;
+}
+.pf-appcard__icon{
+  width:44px;
+  height:44px;
+  border-radius:10px;
+  background:rgba(201,165,78,.08);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:20px;
+}
+.pf-appcard__title{font-weight:700; font-size:13px;}
+.pf-appcard__desc{font-size:12px; color:var(--pf-muted); margin-top:4px;}
+.pf-appcard__badges{display:flex; flex-wrap:wrap; gap:6px; margin-top:8px;}
+.pf-appbadge{
+  font-size:10px;
+  padding:2px 6px;
+  border-radius:999px;
+  background:rgba(201,165,78,.08);
+  color:var(--pf-muted);
+  border:1px solid var(--pf-border);
+}
+.pf-appcard__actions{
+  grid-column:1 / -1;
+  display:flex;
+  gap:8px;
+  margin-top:10px;
+}
+.pf-appcard--locked{
+  border-color:rgba(160,64,64,.3);
+  background:rgba(160,64,64,.06);
+}
+.pf-appcard--locked::after{
+  content:"Locked";
+  position:absolute;
+  top:10px;
+  right:10px;
+  font-size:10px;
+  background:var(--pf-danger-bg);
+  border:1px solid rgba(160,64,64,.3);
+  color:#e07070;
+  border-radius:999px;
+  padding:2px 6px;
+}
+
+/* Settings */
+.pf-settings__grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit, minmax(220px, 1fr));
+  gap:12px;
+  margin-bottom:12px;
+}
+.pf-settings__panel{
+  border:1px solid var(--pf-border);
+  border-radius:8px;
+  padding:12px;
+  background:var(--pf-panel2);
+}
+.pf-settings__title{margin:0 0 8px 0; font-size:13px;}
+.pf-settings__options{display:flex; gap:8px; flex-wrap:wrap;}
+.pf-settings__btn{
+  border:1px solid var(--pf-border);
+  background:var(--pf-panel);
+  color:var(--pf-text);
+  border-radius:6px;
+  padding:6px 10px;
+  cursor:pointer;
+  font-size:12px;
+}
+.pf-settings__btn.is-active{
+  border-color:var(--pf-accent);
+  background:var(--pf-accent-subtle);
+}
+.pf-settings__swatches{display:flex; gap:10px;}
+.pf-settings__swatch{
+  width:26px;
+  height:26px;
+  border-radius:50%;
+  border:2px solid var(--pf-panel2);
+  box-shadow:0 0 0 1px var(--pf-border);
+  cursor:pointer;
+}
+.pf-settings__swatch[data-value="#1e63c5"]{background:#1e63c5;}
+.pf-settings__swatch[data-value="#2db5a3"]{background:#2db5a3;}
+.pf-settings__swatch[data-value="#8257ff"]{background:#8257ff;}
+.pf-settings__swatch[data-value="#ff7a59"]{background:#ff7a59;}
+.pf-settings__swatch.is-active{box-shadow:0 0 0 2px var(--pf-accent);}
+.pf-settings__hint{font-size:12px; color:var(--pf-muted); margin-top:6px;}
+
+/* Vault */
+.pf-vault__grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit, minmax(220px, 1fr));
+  gap:12px;
+}
+.pf-vault__panel{
+  border:1px solid var(--pf-border);
+  border-radius:8px;
+  padding:12px;
+  background:var(--pf-panel2);
+}
+.pf-vault__title{margin:0 0 8px 0; font-size:13px;}
+.pf-vault__empty{font-size:12px; color:var(--pf-muted); margin-bottom:10px;}
+.pf-vault__signin{padding:10px; border:1px dashed var(--pf-border); border-radius:8px; background:var(--pf-panel2);}
+
+/* Tools: tool icon badges */
+.pf-toolcard__meta{display:flex; gap:10px; align-items:center;}
+.pf-toolcard__text{min-width:0;}
+.pf-toolicon{
+  width:34px;
+  height:34px;
+  border:1px solid var(--pf-border);
+  background:var(--pf-panel2);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  flex:0 0 auto;
+}
+.pf-toolicon__glyph{font-size:18px; line-height:1;}
+.pf-toolicon--disabled{opacity:.55;}
+
+/* Image Compressor app layout */
+.pf-compressor__layout{
+  display:grid;
+  grid-template-columns: minmax(280px, 360px) minmax(260px, 1fr);
+  gap:12px;
+  align-items:start;
+}
+.pf-compressor__panel{
+  border:1px solid var(--pf-border);
+  border-radius:2px;
+  padding:12px;
+  background:var(--pf-panel);
+}
+.pf-compressor__drop{
+  border:1px solid var(--pf-border);
+  background:#111114;
+  padding:10px;
+  border-radius:2px;
+}
+.pf-compressor__drop:focus{outline:2px solid rgba(201,165,78,.3); outline-offset:1px;}
+.pf-compressor__drop--over{border-color:var(--pf-accent); background:var(--pf-accent-subtle);}
+.pf-compressor__previews{
+  display:grid;
+  grid-template-columns: 1fr 1fr;
+  gap:12px;
+}
+.pf-compressor__imgwrap{
+  border:1px solid var(--pf-border);
+  background:#111114;
+  padding:8px;
+}
+.pf-compressor__img{
+  display:block;
+  width:100%;
+  max-height:240px;
+  object-fit:contain;
+  background:#111114;
+}
+.pf-compressor__stats{
+  margin-top:8px;
+  font-size:12px;
+  color:var(--pf-muted);
+}
+@media (max-width: 760px){
+  .pf-compressor__layout{grid-template-columns:1fr;}
+  .pf-compressor__previews{grid-template-columns:1fr;}
+}
+
+/* File Converter app layout (mirrors compressor) */
+.pf-converter__layout{
+  display:grid;
+  grid-template-columns: minmax(280px, 360px) minmax(260px, 1fr);
+  gap:12px;
+  align-items:start;
+}
+.pf-converter__panel{
+  border:1px solid var(--pf-border);
+  border-radius:2px;
+  padding:12px;
+  background:var(--pf-panel);
+}
+.pf-converter__drop{
+  border:1px solid var(--pf-border);
+  background:#111114;
+  padding:10px;
+  border-radius:2px;
+}
+.pf-converter__drop:focus{outline:2px solid rgba(201,165,78,.3); outline-offset:1px;}
+.pf-converter__drop--over{border-color:var(--pf-accent); background:var(--pf-accent-subtle);}
+.pf-converter__previews{
+  display:grid;
+  grid-template-columns: 1fr 1fr;
+  gap:12px;
+}
+.pf-converter__imgwrap{
+  border:1px solid var(--pf-border);
+  background:#111114;
+  padding:8px;
+}
+.pf-converter__img{
+  display:block;
+  width:100%;
+  max-height:240px;
+  object-fit:contain;
+  background:#111114;
+}
+.pf-converter__stats{
+  margin-top:8px;
+  font-size:12px;
+  color:var(--pf-muted);
+}
+@media (max-width: 760px){
+  .pf-converter__layout{grid-template-columns:1fr;}
+  .pf-converter__previews{grid-template-columns:1fr;}
+}
+
+.pf-winproduct{display:grid; grid-template-columns: minmax(220px, 1fr) minmax(240px, 1fr); gap:14px;}
+.pf-winproduct__media img{width:100%; border-radius:0; display:block;}
+.pf-winfooter{margin-top:12px; color:var(--pf-muted); font-size:12px;}
+@media (max-width: 760px){
+  .pf-winproduct{grid-template-columns:1fr;}
+  .pf-startmenu__inner{grid-template-columns:1fr; grid-template-rows:auto 1fr auto;}
+  .pf-startmenu__rail{
+    flex-direction:row;
+    justify-content:flex-start;
+    border-right:0;
+    border-bottom:1px solid var(--pf-border);
+  }
+  .pf-startmenu__apps{border-right:0; border-top:1px solid var(--pf-border);}
+  .pf-startmenu__pinned{border-top:1px solid var(--pf-border);}
+  .pf-pins{grid-template-columns:repeat(auto-fill, minmax(140px, 1fr));}
+  .pf-support__grid{grid-template-columns:1fr;}
+  .pf-support__fields{grid-template-columns:1fr;}
+  .pf-appstore__controls{grid-template-columns:1fr; align-items:stretch;}
+  .pf-appstore__grid{grid-template-columns:1fr;}
+}
+
+
+/* Maximized windows */
+.pf-win[data-max="true"]{
+  border-radius: 0;
+}
+
+/* Reduce motion friendly */
+@media (prefers-reduced-motion: reduce){
+  .pf-win{transition:none !important;}
+}
+
+
+
+/* Local UI scale (Settings app) */
+:root{ --pf-ui-scale: 1; }
+.pf-os{ zoom: var(--pf-ui-scale); }
+
+html.pf-reduce-motion *{ animation:none !important; transition:none !important; scroll-behavior:auto !important; }
+
+/* OS settings-driven surface */
+.pf-os{
+  --pf-radius:8px;
+}
+.pf-os .pf-startbtn,
+.pf-os .pf-taskbtn,
+.pf-os .pf-task,
+.pf-os .pf-win,
+.pf-os .pf-startmenu,
+.pf-os .pf-flyout,
+.pf-os .pf-railbtn,
+.pf-os .pf-tile,
+.pf-os .pf-winbtn,
+.pf-os .pf-wininput{
+  border-radius:var(--pf-radius);
+}
+
+.pf-os[data-theme="neon"]{
+  --pf-bg:#0a0a10;
+  --pf-text:#f1f1ef;
+  --pf-muted:#a0a09a;
+  --pf-panel:#12121a;
+  --pf-panel2:#181822;
+  --pf-border:#2a2a38;
+}
+.pf-os[data-theme="neon"] .pf-wallpaper{
+  background:
+    radial-gradient(circle at 20% 20%, rgba(201,165,78,.12), transparent 45%),
+    radial-gradient(circle at 75% 10%, rgba(201,165,78,.08), transparent 42%),
+    linear-gradient(180deg, #0a0a10, #0d0d12 70%);
+}
+.pf-os[data-wallpaper="grid"] .pf-wallpaper{
+  background:
+    linear-gradient(rgba(201,165,78,.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(201,165,78,.04) 1px, transparent 1px),
+    linear-gradient(180deg, #0d0d0f, #111114 70%);
+  background-size:28px 28px, 28px 28px, auto;
+}
+
+.pf-os[data-icon-size="small"] .pf-icons{grid-template-rows:repeat(auto-fill, 64px); grid-auto-columns:78px;}
+.pf-os[data-icon-size="small"] .pf-iconimg{height:34px; margin-bottom:4px;}
+.pf-os[data-icon-size="small"] .pf-iconimg img{width:34px; height:34px;}
+.pf-os[data-icon-size="small"] .pf-emoji{font-size:22px;}
+.pf-os[data-icon-size="large"] .pf-icons{grid-template-rows:repeat(auto-fill, 86px); grid-auto-columns:104px;}
+.pf-os[data-icon-size="large"] .pf-iconimg{height:52px;}
+.pf-os[data-icon-size="large"] .pf-iconimg img{width:52px; height:52px;}
+.pf-os[data-icon-size="large"] .pf-emoji{font-size:34px;}
+
+.pf-os[data-window-blur="off"] .pf-taskbar,
+.pf-os[data-window-blur="off"] .pf-startmenu,
+.pf-os[data-window-blur="off"] .pf-flyout{
+  backdrop-filter:none;
+}
+.pf-os[data-window-shadows="off"] .pf-win,
+.pf-os[data-window-shadows="off"] .pf-startmenu,
+.pf-os[data-window-shadows="off"] .pf-flyout{
+  box-shadow:none;
+}
+.pf-os[data-perf-mode="on"] .pf-wallpaper::after{background:rgba(0,0,0,.35);}
+.pf-os[data-perf-mode="on"] .pf-win,
+.pf-os[data-perf-mode="on"] .pf-startmenu,
+.pf-os[data-perf-mode="on"] .pf-flyout{backdrop-filter:none;}
+
+.pf-os[data-taskbar-position="top"] .pf-taskbar{
+  top:0;
+  bottom:auto;
+  border-top:0;
+  border-bottom:1px solid var(--pf-border);
+  box-shadow:0 8px 24px rgba(0,0,0,.4);
+}
+.pf-os[data-taskbar-position="top"] .pf-desktop,
+.pf-os[data-taskbar-position="top"] .pf-windowlayer{
+  inset:var(--pf-taskbar-height) 0 0 0;
+}
+.pf-os[data-taskbar-position="top"] .pf-startmenu{
+  top:calc(var(--pf-taskbar-height) + 4px);
+  bottom:auto;
+}
+
+.pf-os[data-taskbar-position="left"] .pf-taskbar{
+  width:58px;
+  right:auto;
+  top:0;
+  bottom:0;
+  height:100vh;
+  flex-direction:column;
+  justify-content:flex-start;
+  padding:8px 6px;
+}
+.pf-os[data-taskbar-position="left"] .pf-tasks{
+  flex-direction:column;
+  overflow-y:auto;
+  overflow-x:hidden;
+  width:100%;
+}
+.pf-os[data-taskbar-position="left"] .pf-task{
+  width:100%;
+  padding:6px;
+  max-width:none;
+}
+.pf-os[data-taskbar-position="left"] .pf-task__title{display:none;}
+.pf-os[data-taskbar-position="left"] .pf-task__min{margin-left:0;}
+.pf-os[data-taskbar-position="left"] .pf-clock{
+  writing-mode:vertical-rl;
+  transform:rotate(180deg);
+  margin-top:auto;
+}
+.pf-os[data-taskbar-position="left"] .pf-desktop,
+.pf-os[data-taskbar-position="left"] .pf-windowlayer{
+  inset:0 0 0 58px;
+}
+.pf-os[data-taskbar-position="left"] .pf-startmenu{
+  left:62px;
+  bottom:6px;
+}
+
+.pf-os[data-taskbar-compact="on"] .pf-taskbar{height:40px;}
+.pf-os[data-taskbar-compact="on"] .pf-startbtn{height:30px; padding:0 10px;}
+.pf-os[data-taskbar-compact="on"] .pf-task{height:28px;}
+.pf-os[data-taskbar-compact="on"] .pf-taskbtn{height:28px;}
+
+.pf-os[data-taskbar-autohide="on"][data-taskbar-position="bottom"] .pf-taskbar{
+  transform:translateY(calc(100% - 6px));
+  transition:transform .2s ease;
+}
+.pf-os[data-taskbar-autohide="on"][data-taskbar-position="bottom"] .pf-taskbar:hover{
+  transform:translateY(0);
+}
+.pf-os[data-taskbar-autohide="on"][data-taskbar-position="top"] .pf-taskbar{
+  transform:translateY(calc(-100% + 6px));
+  transition:transform .2s ease;
+}
+.pf-os[data-taskbar-autohide="on"][data-taskbar-position="top"] .pf-taskbar:hover{
+  transform:translateY(0);
+}
+.pf-os[data-taskbar-autohide="on"][data-taskbar-position="left"] .pf-taskbar{
+  transform:translateX(calc(-100% + 8px));
+  transition:transform .2s ease;
+}
+.pf-os[data-taskbar-autohide="on"][data-taskbar-position="left"] .pf-taskbar:hover{
+  transform:translateX(0);
+}
+
+.pf-os[data-start-menu-style="compact"] .pf-startmenu{
+  width:min(520px, calc(100vw - 12px));
+}
+.pf-os[data-start-menu-style="compact"] .pf-startmenu__inner{
+  grid-template-columns:64px minmax(220px, 1fr);
+}
+.pf-os[data-start-menu-style="compact"] .pf-startmenu__pinned{display:none;}
+
+.pf-os[data-high-contrast="on"]{
+  --pf-bg:#000;
+  --pf-text:#fff;
+  --pf-panel:#111;
+  --pf-panel2:#1a1a1a;
+  --pf-border:#fff;
+}
+.pf-os[data-high-contrast="on"] .pf-win,
+.pf-os[data-high-contrast="on"] .pf-startmenu,
+.pf-os[data-high-contrast="on"] .pf-flyout{
+  border-width:2px;
+}
+
+.pf-os[data-large-text="on"]{font-size:1.08rem;}
+.pf-os[data-help-text="off"] .pf-setting-desc{display:none;}
+
+/* Next-gen settings app */
+.pf-settings-shell{
+  display:grid;
+  grid-template-columns:250px 1fr;
+  min-height:520px;
+  border:1px solid var(--pf-border);
+  border-radius:10px;
+  overflow:hidden;
+  background:var(--pf-panel);
+}
+.pf-settings-nav{
+  background:#0d0d0f;
+  color:var(--pf-text);
+  padding:14px 12px;
+}
+.pf-settings-navtitle{
+  font-size:12px;
+  font-weight:700;
+  letter-spacing:.14em;
+  text-transform:uppercase;
+  opacity:.9;
+  margin-bottom:10px;
+  color:var(--pf-accent);
+}
+.pf-settings-navitems{display:flex; flex-direction:column; gap:8px;}
+.pf-settings-navitem{
+  border:1px solid var(--pf-border);
+  background:rgba(255,255,255,.04);
+  color:var(--pf-text);
+  border-radius:8px;
+  padding:8px 10px;
+  display:flex;
+  align-items:center;
+  gap:8px;
+  text-align:left;
+  cursor:pointer;
+}
+.pf-settings-navitem:hover{background:rgba(201,165,78,.08); border-color:rgba(201,165,78,.2);}
+.pf-settings-navitem.is-active{
+  background:rgba(201,165,78,.12);
+  border-color:var(--pf-accent);
+  color:var(--pf-accent);
+}
+.pf-settings-navitem:disabled{opacity:.5; cursor:default;}
+.pf-settings-main{
+  display:grid;
+  grid-template-rows:auto 1fr auto;
+  min-width:0;
+  background:var(--pf-panel);
+}
+.pf-settings-topbar{
+  display:flex;
+  align-items:flex-end;
+  justify-content:space-between;
+  gap:12px;
+  padding:12px;
+  border-bottom:1px solid var(--pf-border);
+  background:#111114;
+}
+.pf-settings-breadcrumbs{font-size:12px; color:var(--pf-muted); font-weight:700;}
+.pf-settings-search{display:flex; flex-direction:column; gap:6px; min-width:260px;}
+.pf-settings-pane{
+  padding:12px;
+  overflow:auto;
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+}
+.pf-settings-section{
+  border:1px solid var(--pf-border);
+  border-radius:10px;
+  background:var(--pf-panel2);
+  padding:12px;
+}
+.pf-settings-sectiontitle{
+  margin:0 0 10px 0;
+  font-size:12px;
+  color:var(--pf-muted);
+  letter-spacing:.14em;
+  text-transform:uppercase;
+}
+.pf-settings-rows{display:flex; flex-direction:column; gap:8px;}
+.pf-setting-row{
+  display:grid;
+  grid-template-columns:minmax(240px, 1fr) 240px;
+  gap:12px;
+  align-items:center;
+  border:1px solid var(--pf-border);
+  border-radius:8px;
+  padding:10px;
+  background:var(--pf-panel);
+}
+.pf-setting-row.is-disabled{opacity:.62;}
+.pf-setting-label{margin:0; font-size:14px;}
+.pf-setting-desc{margin:4px 0 0 0; color:var(--pf-muted); font-size:12px;}
+.pf-setting-dependency{margin:6px 0 0 0; color:#e07070; font-size:11px;}
+.pf-setting-control{display:flex; justify-content:flex-end; align-items:center;}
+.pf-setting-toggle{
+  border:1px solid var(--pf-border);
+  background:var(--pf-panel2);
+  color:var(--pf-text);
+  border-radius:999px;
+  min-width:74px;
+  padding:7px 12px;
+  font-weight:700;
+  cursor:pointer;
+}
+.pf-setting-toggle[aria-pressed="true"]{
+  background:var(--pf-accent-subtle);
+  border-color:var(--pf-accent);
+  color:var(--pf-accent);
+}
+.pf-setting-rangewrap{display:flex; align-items:center; gap:8px; min-width:190px;}
+.pf-setting-range{width:140px;}
+.pf-setting-rangeout{
+  min-width:36px;
+  text-align:right;
+  font-size:12px;
+  color:var(--pf-muted);
+}
+.pf-setting-color{
+  width:44px;
+  height:34px;
+  border:1px solid var(--pf-border);
+  border-radius:6px;
+  background:var(--pf-panel2);
+}
+.pf-settings-sticky{
+  position:sticky;
+  bottom:0;
+  background:#111114;
+  border-top:1px solid var(--pf-border);
+  padding:10px 12px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  flex-wrap:wrap;
+}
+.pf-settings-stickygroup{display:flex; align-items:center; gap:8px; flex-wrap:wrap;}
+.pf-settings-sync{font-size:11px; color:var(--pf-muted);}
+.pf-settings-empty{
+  border:1px dashed var(--pf-border);
+  border-radius:8px;
+  padding:14px;
+  color:var(--pf-muted);
+  background:var(--pf-panel2);
+}
+.pf-settings-toaststack{
+  position:fixed;
+  right:18px;
+  bottom:70px;
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+  z-index:7800;
+}
+.pf-settings-toast{
+  border:1px solid var(--pf-border);
+  background:var(--pf-panel2);
+  color:var(--pf-text);
+  border-radius:8px;
+  padding:8px 10px;
+  box-shadow:0 10px 22px rgba(0,0,0,.3);
+  font-size:12px;
+}
+.pf-settings-toast--success{border-color:rgba(74,138,92,.3); background:var(--pf-success-bg); color:#7cc08a;}
+.pf-settings-toast--error{border-color:rgba(160,64,64,.3); background:var(--pf-danger-bg); color:#e07070;}
+.pf-settings-toast.is-out{opacity:0; transform:translateY(4px);}
+.pf-settings-modal{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.55);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  z-index:7900;
+}
+.pf-settings-modal[hidden]{display:none !important;}
+.pf-settings-modal__card{
+  width:min(520px, calc(100vw - 24px));
+  background:var(--pf-panel);
+  border:1px solid var(--pf-border);
+  border-radius:10px;
+  padding:14px;
+}
+.pf-settings-modal__title{margin:0 0 8px 0; font-size:16px; letter-spacing:.02em;}
+.pf-settings-modal__body{margin:0 0 10px 0; color:var(--pf-muted); font-size:13px;}
+.pf-settings-modal__input{
+  width:100%;
+  min-height:140px;
+  resize:vertical;
+  margin-bottom:10px;
+}
+.pf-settings-modal__input[hidden]{display:none !important;}
+.pf-settings-modal__actions{display:flex; justify-content:flex-end; gap:8px;}
+
+.pf-settings-pane.is-switching{
+  animation:pf-settings-pane-in .22s ease;
+}
+@keyframes pf-settings-pane-in{
+  from{opacity:.6; transform:translateY(4px);}
+  to{opacity:1; transform:translateY(0);}
+}
+
+.pf-setting-row.is-jump-highlight{
+  border-color:var(--pf-accent);
+  box-shadow:0 0 0 2px rgba(201,165,78,.15);
+}
+
+.pf-settings-rec-card{
+  margin:10px 12px 0 12px;
+  padding:10px 12px;
+  border:1px solid var(--pf-border);
+  background:rgba(201,165,78,.06);
+  border-radius:8px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+}
+.pf-settings-rec-title{font-size:12px; font-weight:700; margin-bottom:2px; color:var(--pf-text);}
+.pf-settings-rec-text{font-size:12px; color:var(--pf-muted);}
+
+.pf-settings-previewbar{
+  width:100%;
+  margin-top:6px;
+  border:1px dashed var(--pf-border);
+  background:var(--pf-panel);
+  border-radius:8px;
+  padding:8px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:8px;
+  flex-wrap:wrap;
+}
+.pf-settings-previewchips{
+  display:flex;
+  align-items:center;
+  gap:6px;
+  flex-wrap:wrap;
+}
+.pf-settings-chip{
+  font-size:11px;
+  padding:3px 8px;
+  border-radius:999px;
+  border:1px solid var(--pf-border);
+  background:var(--pf-panel2);
+  color:var(--pf-muted);
+}
+.pf-settings-previewactions{display:flex; align-items:center; gap:8px;}
+
+.pf-settings-palette{
+  position:fixed;
+  inset:0;
+  z-index:7850;
+  background:rgba(0,0,0,.55);
+  display:flex;
+  align-items:flex-start;
+  justify-content:center;
+  padding-top:76px;
+}
+.pf-settings-palette[hidden]{display:none !important;}
+.pf-settings-palette__card{
+  width:min(700px, calc(100vw - 24px));
+  border:1px solid var(--pf-border);
+  border-radius:10px;
+  background:var(--pf-panel);
+  box-shadow:0 18px 40px rgba(0,0,0,.45);
+  overflow:hidden;
+}
+.pf-settings-palette__input{
+  border-radius:0;
+  border-width:0 0 1px 0;
+  width:100%;
+  padding:12px;
+}
+.pf-settings-palette__results{
+  max-height:380px;
+  overflow:auto;
+  padding:8px;
+}
+.pf-settings-palette__item{
+  width:100%;
+  border:1px solid transparent;
+  background:var(--pf-panel);
+  border-radius:8px;
+  padding:10px;
+  margin-bottom:6px;
+  text-align:left;
+  cursor:pointer;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:8px;
+  color:var(--pf-text);
+}
+.pf-settings-palette__item:hover{
+  border-color:rgba(201,165,78,.2);
+  background:rgba(201,165,78,.06);
+}
+.pf-settings-palette__label{font-size:13px; color:var(--pf-text); font-weight:650;}
+.pf-settings-palette__meta{font-size:11px; color:var(--pf-muted);}
+
+.pf-troubleshooter{
+  border:1px solid var(--pf-border);
+  background:var(--pf-panel2);
+  border-radius:10px;
+  padding:12px;
+}
+.pf-troubleshooter__header{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  margin-bottom:10px;
+}
+.pf-troubleshooter__list{
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+}
+.pf-troubleshooter__row{
+  border:1px solid var(--pf-border);
+  border-radius:8px;
+  padding:10px;
+  display:grid;
+  grid-template-columns:auto 1fr;
+  gap:10px;
+  align-items:start;
+  background:var(--pf-panel);
+}
+.pf-tr-status{
+  font-size:10px;
+  font-weight:700;
+  letter-spacing:.08em;
+  border-radius:999px;
+  padding:4px 8px;
+  border:1px solid var(--pf-border);
+  color:var(--pf-muted);
+}
+.pf-tr-status--pass{background:var(--pf-success-bg); border-color:rgba(74,138,92,.3); color:#7cc08a;}
+.pf-tr-status--warn{background:rgba(201,165,78,.10); border-color:rgba(201,165,78,.3); color:var(--pf-accent);}
+.pf-tr-status--fail{background:var(--pf-danger-bg); border-color:rgba(160,64,64,.3); color:#e07070;}
+.pf-troubleshooter__label{font-size:13px; font-weight:700; color:var(--pf-text);}
+.pf-troubleshooter__detail{font-size:12px; color:var(--pf-muted); margin-top:3px;}
+
+@media (max-width: 980px){
+  .pf-settings-shell{grid-template-columns:1fr;}
+  .pf-settings-nav{padding:10px; border-bottom:1px solid var(--pf-border);}
+  .pf-settings-navitems{flex-direction:row; flex-wrap:wrap;}
+  .pf-settings-navitem{width:auto;}
+  .pf-setting-row{grid-template-columns:1fr;}
+  .pf-setting-control{justify-content:flex-start;}
+  .pf-settings-search{min-width:0; width:100%;}
+  .pf-settings-topbar{align-items:stretch; flex-direction:column;}
+  .pf-settings-rec-card{margin:8px 10px 0 10px; align-items:flex-start; flex-direction:column;}
+  .pf-settings-palette{padding-top:34px;}
+}
+
+/* --- Mobile + Tablet OS mode (scoped) --- */
+:root{
+  --pf-mobile-bar-height:52px;
+  --pf-mobile-nav-height:56px;
+}
+.pf-startmenu__search,
+.pf-startmenu__recents{display:none;}
+html.is-mobile .pf-startmenu__search,
+html.is-tablet .pf-startmenu__search,
+html.is-mobile .pf-startmenu__recents,
+html.is-tablet .pf-startmenu__recents{display:block;}
+html.is-mobile .pf-os,
+html.is-tablet .pf-os{
+  --pf-mobile-bar-height:calc(52px + env(safe-area-inset-top));
+  --pf-taskbar-height:var(--pf-mobile-nav-height);
+}
+html.is-mobile .pf-desktop,
+html.is-tablet .pf-desktop{
+  inset:0 0 var(--pf-taskbar-height) 0;
+  padding:calc(12px + env(safe-area-inset-top)) 12px calc(16px + var(--pf-taskbar-height) + env(safe-area-inset-bottom));
+  overflow:auto;
+  overflow-x:hidden;
+  -webkit-overflow-scrolling:touch;
+}
+html.is-mobile .pf-icons,
+html.is-tablet .pf-icons{
+  grid-auto-flow:row;
+  grid-auto-columns:unset;
+  grid-template-rows:none;
+  grid-template-columns:repeat(2, minmax(0, 1fr));
+  gap:12px;
+  align-content:start;
+}
+@media (min-width: 481px) and (max-width: 767px){
+  html.is-mobile .pf-icons{grid-template-columns:repeat(3, minmax(0, 1fr));}
+}
+@media (min-width: 768px) and (max-width: 1024px){
+  html.is-tablet .pf-icons{grid-template-columns:repeat(4, minmax(0, 1fr));}
+}
+html.is-mobile .pf-icon,
+html.is-tablet .pf-icon{
+  position:static !important;
+  left:auto !important;
+  top:auto !important;
+  min-height:92px;
+  padding:12px 10px;
+  border-radius:10px;
+  touch-action:manipulation;
+}
+html.is-mobile .pf-iconimg,
+html.is-tablet .pf-iconimg{height:52px;}
+html.is-mobile .pf-iconimg img,
+html.is-tablet .pf-iconimg img{width:52px; height:52px;}
+html.is-mobile .pf-iconlabel,
+html.is-tablet .pf-iconlabel{font-size:12px;}
+
+html.is-mobile .pf-taskbar,
+html.is-tablet .pf-taskbar{
+  top:auto;
+  bottom:0;
+  left:0;
+  right:0;
+  height:calc(var(--pf-taskbar-height) + env(safe-area-inset-bottom));
+  padding:0 10px env(safe-area-inset-bottom);
+  gap:8px;
+  flex-direction:row;
+}
+html.is-mobile .pf-tasks,
+html.is-tablet .pf-tasks,
+html.is-mobile .pf-clock,
+html.is-tablet .pf-clock{display:none;}
+html.is-mobile .pf-starttext,
+html.is-tablet .pf-starttext{display:none;}
+html.is-mobile .pf-startbtn,
+html.is-tablet .pf-startbtn,
+html.is-mobile .pf-taskbtn,
+html.is-tablet .pf-taskbtn{
+  min-height:44px;
+  min-width:44px;
+  font-size:14px;
+  touch-action:manipulation;
+}
+html.is-mobile .pf-menu__btn,
+html.is-tablet .pf-menu__btn,
+html.is-mobile .pf-winbtn,
+html.is-tablet .pf-winbtn{
+  min-height:44px;
+}
+
+html.is-mobile .pf-windowlayer,
+html.is-tablet .pf-windowlayer{inset:0;}
+html.is-mobile .pf-win,
+html.is-tablet .pf-win{
+  position:fixed !important;
+  left:0 !important;
+  right:0 !important;
+  top:env(safe-area-inset-top) !important;
+  bottom:calc(var(--pf-taskbar-height) + env(safe-area-inset-bottom)) !important;
+  width:100vw !important;
+  height:calc(100dvh - var(--pf-taskbar-height) - env(safe-area-inset-bottom) - env(safe-area-inset-top)) !important;
+  max-width:100vw;
+  max-height:100dvh;
+  border-radius:12px 12px 0 0;
+  box-shadow:0 18px 40px rgba(0,0,0,.45);
+  touch-action:pan-y;
+}
+html.is-mobile .pf-win__bar,
+html.is-tablet .pf-win__bar{
+  height:var(--pf-mobile-bar-height);
+  padding:env(safe-area-inset-top) 12px 8px;
+  position:sticky;
+  top:0;
+  z-index:1;
+}
+html.is-mobile .pf-win__title,
+html.is-tablet .pf-win__title{font-size:14px;}
+html.is-mobile .pf-win__controls,
+html.is-tablet .pf-win__controls{gap:8px;}
+html.is-mobile .pf-win__ctrl,
+html.is-tablet .pf-win__ctrl{min-width:44px; height:44px;}
+html.is-mobile .pf-win__ctrl[data-max],
+html.is-tablet .pf-win__ctrl[data-max]{display:none;}
+.pf-win__ctrl--menu{display:none;}
+html.is-mobile .pf-win__ctrl--menu,
+html.is-tablet .pf-win__ctrl--menu{display:inline-flex;}
+html.is-mobile .pf-win__ctrl[data-min],
+html.is-tablet .pf-win__ctrl[data-min]{font-size:0;}
+html.is-mobile .pf-win__ctrl[data-min]::before,
+html.is-tablet .pf-win__ctrl[data-min]::before{
+  content:"←";
+  font-size:16px;
+}
+html.is-mobile .pf-win__body,
+html.is-tablet .pf-win__body{
+  height:calc(100% - var(--pf-mobile-bar-height));
+  padding:12px;
+  padding-bottom:calc(16px + env(safe-area-inset-bottom));
+  overflow-x:hidden;
+  -webkit-overflow-scrolling:touch;
+}
+html.is-mobile .pf-wininput,
+html.is-tablet .pf-wininput,
+html.is-mobile .pf-win__body input,
+html.is-mobile .pf-win__body textarea,
+html.is-mobile .pf-win__body select,
+html.is-tablet .pf-win__body input,
+html.is-tablet .pf-win__body textarea,
+html.is-tablet .pf-win__body select{
+  font-size:16px;
+}
+
+html.is-mobile .pf-startmenu,
+html.is-tablet .pf-startmenu{
+  left:0;
+  right:0;
+  bottom:calc(var(--pf-taskbar-height) + env(safe-area-inset-bottom));
+  top:auto;
+  width:100%;
+  border-radius:16px 16px 0 0;
+  max-height:calc(100dvh - var(--pf-taskbar-height) - env(safe-area-inset-bottom));
+}
+html.is-mobile .pf-startmenu__inner,
+html.is-tablet .pf-startmenu__inner{
+  grid-template-columns:1fr;
+  grid-template-rows:auto auto 1fr;
+}
+html.is-mobile .pf-startmenu__apps,
+html.is-tablet .pf-startmenu__apps{
+  padding:12px;
+  overflow:auto;
+  border-right:0;
+}
+html.is-mobile .pf-startmenu__pinned,
+html.is-tablet .pf-startmenu__pinned{border-top:1px solid var(--pf-border);}
+html.is-mobile .pf-startmenu__searchinput,
+html.is-tablet .pf-startmenu__searchinput{
+  width:100%;
+  font-size:16px;
+}
+html.is-mobile .pf-startmenu__recents,
+html.is-tablet .pf-startmenu__recents{margin-top:12px;}
+html.is-mobile .pf-recents,
+html.is-tablet .pf-recents{
+  list-style:none;
+  padding:0;
+  margin:0;
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+}
+html.is-mobile .pf-recents__btn,
+html.is-tablet .pf-recents__btn{
+  width:100%;
+  min-height:44px;
+  border-radius:8px;
+  border:1px solid var(--pf-border);
+  background:var(--pf-panel2);
+  color:var(--pf-text);
+  text-align:left;
+  padding:8px 10px;
+}
+html.is-mobile .pf-recents__btn.is-active,
+html.is-tablet .pf-recents__btn.is-active{
+  border-color:var(--pf-accent);
+  box-shadow:inset 0 0 0 1px rgba(201,165,78,.2);
+}
+html.is-mobile .pf-recents__btn.is-minimized,
+html.is-tablet .pf-recents__btn.is-minimized{
+  color:var(--pf-muted);
+}

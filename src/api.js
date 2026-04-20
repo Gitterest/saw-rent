@@ -50,6 +50,12 @@ export const api = {
   createCheckoutSession(payload) {
     return send("/public/checkout-session", { method: "POST", body: payload })
   },
+  createCryptoPayment(requestId, payload) {
+    return send(`/public/requests/${requestId}/crypto-payment`, { method: "POST", body: payload })
+  },
+  submitCryptoTxid(requestId, payload) {
+    return send(`/public/requests/${requestId}/crypto-payment/txid`, { method: "POST", body: payload })
+  },
   adminSession() {
     return send("/admin/session")
   },
@@ -62,8 +68,26 @@ export const api = {
   adminDashboard() {
     return send("/admin/dashboard")
   },
+  updateSettings(payload) {
+    return send("/admin/settings", { method: "PATCH", body: payload })
+  },
+  createMaintenanceRecord(payload) {
+    return send("/admin/maintenance", { method: "POST", body: payload })
+  },
+  updateMaintenanceRecord(recordId, payload) {
+    return send(`/admin/maintenance/${recordId}`, { method: "PATCH", body: payload })
+  },
   updateRequestStatus(requestId, status) {
     return send(`/admin/requests/${requestId}`, { method: "PATCH", body: { status } })
+  },
+  updateCryptoPayment(requestId, payload) {
+    return send(`/admin/requests/${requestId}/crypto-payment`, { method: "PATCH", body: payload })
+  },
+  runCryptoMonitor() {
+    return send("/admin/crypto-monitor/run", { method: "POST" })
+  },
+  markCryptoAlertReviewed(requestId, reviewKey) {
+    return send(`/admin/requests/${requestId}/crypto-alert`, { method: "PATCH", body: { reviewKey } })
   },
   convertRequest(requestId) {
     return send(`/admin/requests/${requestId}/convert`, { method: "POST" })
