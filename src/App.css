@@ -32,6 +32,7 @@
 .window-grid {
   position: relative;
   min-height: 100%;
+  min-width: 0;
 }
 
 .window-grid--public,
@@ -42,6 +43,7 @@
 .window-stack {
   display: grid;
   gap: 16px;
+  min-width: 0;
 }
 
 .metric-strip {
@@ -58,6 +60,7 @@
   padding: 16px;
   display: grid;
   gap: 8px;
+  min-width: 0;
 }
 
 .metric-panel span {
@@ -83,6 +86,7 @@
 .sr-grid {
   display: grid;
   gap: 16px;
+  min-width: 0;
 }
 
 .sr-grid--inventory,
@@ -119,6 +123,11 @@
   align-items: start;
   justify-content: space-between;
   gap: 16px;
+  min-width: 0;
+}
+
+.section-heading > div {
+  min-width: 0;
 }
 
 .section-eyebrow {
@@ -200,11 +209,13 @@
 .data-table strong {
   display: block;
   color: var(--paper-white);
+  overflow-wrap: anywhere;
 }
 
 .inventory-table small,
 .data-table small {
   color: var(--dust-gray);
+  overflow-wrap: anywhere;
 }
 
 .inspector-card,
@@ -305,6 +316,7 @@
 .ops-form {
   display: grid;
   gap: 16px;
+  min-width: 0;
 }
 
 .form-grid {
@@ -316,6 +328,7 @@
 .ops-form label {
   display: grid;
   gap: 8px;
+  min-width: 0;
 }
 
 .ops-form label > span {
@@ -413,12 +426,14 @@
   display: grid;
   gap: 16px;
   grid-template-columns: minmax(280px, 0.9fr) minmax(0, 1.1fr);
+  min-width: 0;
 }
 
 .toolbar-row {
   display: flex;
   gap: 12px;
   align-items: center;
+  min-width: 0;
 }
 
 .toolbar-row > input,
@@ -439,6 +454,7 @@
   background: rgba(19, 24, 31, 0.92);
   color: var(--paper-white);
   padding: 12px 14px;
+  min-width: 0;
 }
 
 .list-row {
@@ -546,6 +562,7 @@
   display: grid;
   gap: 16px;
   grid-template-columns: minmax(180px, 0.72fr) minmax(0, 1fr);
+  min-width: 0;
 }
 
 .crypto-qr-panel {
@@ -558,6 +575,7 @@
   gap: 12px;
   justify-items: center;
   align-content: start;
+  min-width: 0;
 }
 
 .crypto-qr-panel img {
@@ -602,6 +620,7 @@
   border: 1px solid var(--soft-border);
   background: rgba(15, 20, 25, 0.72);
   padding: 12px;
+  min-width: 0;
 }
 
 .crypto-txid-panel p {
@@ -617,6 +636,7 @@
   display: grid;
   gap: 8px;
   min-width: min(100%, 260px);
+  max-width: 100%;
 }
 
 .crypto-admin-actions input,
@@ -634,6 +654,7 @@
   max-width: 260px;
   overflow: hidden;
   text-overflow: ellipsis;
+  overflow-wrap: anywhere;
 }
 
 .button-small {
@@ -765,6 +786,7 @@
 .about-app {
   display: grid;
   gap: 16px;
+  min-width: 0;
 }
 
 .about-hero {
@@ -782,6 +804,7 @@
     linear-gradient(135deg, rgba(29, 33, 37, 0.96), rgba(15, 20, 25, 0.98));
   box-shadow: var(--panel-shadow), var(--inner-ring);
   padding: 22px;
+  min-width: 0;
 }
 
 .about-hero::before {
@@ -800,6 +823,7 @@
   z-index: 1;
   display: grid;
   gap: 12px;
+  min-width: 0;
 }
 
 .about-hero__copy h3 {
@@ -861,6 +885,7 @@
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 12px;
+  min-width: 0;
 }
 
 .about-highlight,
@@ -878,6 +903,7 @@
   gap: 8px;
   padding: 14px;
   transition: transform 160ms ease, border-color 160ms ease, background-color 160ms ease;
+  min-width: 0;
 }
 
 .about-highlight::before {
@@ -931,6 +957,7 @@
   display: flex;
   flex-wrap: wrap;
   gap: 10px;
+  min-width: 0;
 }
 
 .about-payment-chip {
@@ -989,6 +1016,7 @@
   gap: 12px;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   z-index: 1;
+  min-width: 0;
 }
 
 .contact-action-row--stacked {
@@ -1011,6 +1039,7 @@
   padding: 12px;
   box-shadow: var(--inner-ring);
   transition: transform 160ms ease, border-color 160ms ease, background-color 160ms ease, box-shadow 160ms ease;
+  min-width: 0;
 }
 
 .contact-action::after {
@@ -1050,6 +1079,7 @@
 .contact-action strong,
 .contact-action small {
   display: block;
+  overflow-wrap: anywhere;
 }
 
 .contact-action small {
@@ -1062,6 +1092,7 @@
   display: grid;
   gap: 16px;
   grid-template-columns: minmax(0, 1fr) 280px;
+  min-width: 0;
 }
 
 .email-composer,
@@ -1075,6 +1106,7 @@
 
 .email-composer {
   overflow: hidden;
+  min-width: 0;
 }
 
 .email-toolbar {
@@ -1087,6 +1119,7 @@
     linear-gradient(90deg, rgba(249, 115, 22, 0.12), transparent 42%),
     rgba(15, 20, 25, 0.94);
   padding: 14px 16px;
+  min-width: 0;
 }
 
 .email-toolbar h3 {
@@ -1123,6 +1156,7 @@
   display: grid;
   gap: 0;
   padding: 0 16px 16px;
+  min-width: 0;
 }
 
 .email-field-row {
@@ -1132,6 +1166,7 @@
   align-items: center;
   min-height: 48px;
   border-bottom: 1px solid rgba(42, 49, 56, 0.82);
+  min-width: 0;
 }
 
 .email-field-row span,
@@ -1197,6 +1232,7 @@
   display: grid;
   gap: 12px;
   align-content: start;
+  min-width: 0;
 }
 
 .email-side-card {
@@ -1205,6 +1241,7 @@
   display: grid;
   gap: 12px;
   padding: 16px;
+  min-width: 0;
 }
 
 .email-side-card--accent {
@@ -1241,6 +1278,7 @@
   align-items: center;
   padding: 14px;
   transition: transform 150ms ease, border-color 150ms ease;
+  min-width: 0;
 }
 
 .email-attachment-card:hover {
@@ -1261,6 +1299,7 @@
 .email-attachment-card strong,
 .email-attachment-card small {
   display: block;
+  overflow-wrap: anywhere;
 }
 
 .email-attachment-card small {
@@ -1383,6 +1422,16 @@
 }
 
 @media (max-width: 959px) {
+  .window-grid--public,
+  .window-grid--admin {
+    min-height: calc(100dvh - 220px - var(--taskbar-height));
+  }
+
+  .sr-window__body .window-grid--public,
+  .sr-window__body .window-grid--admin {
+    min-height: 100%;
+  }
+
   .data-table__head,
   .inventory-table__header {
     display: none;
@@ -1392,11 +1441,31 @@
   .data-table__row,
   .timeline__item {
     grid-template-columns: 1fr;
+    gap: 8px;
   }
 
-  .window-grid--public,
-  .window-grid--admin {
-    min-height: calc(100vh - 220px);
+  .data-table__row,
+  .inventory-table__row {
+    padding: 12px;
+  }
+
+  .section-heading {
+    flex-wrap: wrap;
+  }
+
+  .detail-list div {
+    grid-template-columns: minmax(92px, 0.75fr) minmax(0, 1fr);
+  }
+
+  .button,
+  input,
+  select,
+  textarea {
+    min-height: 44px;
+  }
+
+  textarea {
+    min-height: 108px;
   }
 }
 
@@ -1408,16 +1477,157 @@
   .metric-strip,
   .inventory-cards,
   .summary-grid,
-  .crypto-choice-row {
+  .crypto-choice-row,
+  .crypto-admin-quote {
     grid-template-columns: 1fr;
   }
 
+  .auth-window,
+  .panel-stack,
+  .briefing-card,
+  .inventory-card,
+  .inspector-card,
+  .empty-panel,
+  .alert-card,
+  .metric-panel {
+    border-radius: 8px;
+    padding: 12px;
+  }
+
+  .section-heading {
+    display: grid;
+    gap: 10px;
+  }
+
+  .section-heading h3,
+  .briefing-card h3,
+  .inventory-card h3,
+  .email-toolbar h3 {
+    font-size: 16px;
+  }
+
+  .window-actions,
+  .table-actions,
+  .email-send-row,
+  .email-meta-row,
+  .toolbar-row,
+  .activity-row,
+  .list-row {
+    align-items: stretch;
+  }
+
+  .toolbar-row,
+  .activity-row,
+  .email-send-row {
+    flex-direction: column;
+  }
+
+  .window-actions .button,
+  .table-actions .button,
+  .toolbar-row > input,
+  .toolbar-row > select,
+  .crypto-choice-row .button,
+  .email-send-row .button {
+    width: 100%;
+  }
+
+  .detail-list div {
+    grid-template-columns: 1fr;
+    gap: 4px;
+  }
+
+  .detail-list dd {
+    text-align: left;
+    overflow-wrap: anywhere;
+  }
+
+  .list-row {
+    display: grid;
+  }
+
+  .list-row__meta {
+    justify-items: start;
+  }
+
+  .selection-chip {
+    width: 100%;
+    min-width: 0;
+  }
+
   .about-hero {
-    padding: 18px;
+    min-height: auto;
+    padding: 16px;
+    gap: 16px;
+  }
+
+  .about-hero__copy h3 {
+    font-size: 24px;
+  }
+
+  .about-hero__copy p:not(.section-eyebrow) {
+    font-size: 13px;
+    line-height: 1.55;
   }
 
   .about-sfc-badge {
     width: 112px;
     height: 112px;
+  }
+
+  .about-payment-chip {
+    flex: 1 1 calc(50% - 10px);
+    min-width: 128px;
+  }
+
+  .contact-action {
+    grid-template-columns: 44px minmax(0, 1fr);
+    min-height: 72px;
+  }
+
+  .contact-action__icon {
+    width: 40px;
+    height: 40px;
+  }
+
+  .email-toolbar {
+    padding: 12px;
+  }
+
+  .email-compose-form {
+    padding: 0 12px 12px;
+  }
+
+  .email-field-row {
+    grid-template-columns: 1fr;
+    gap: 4px;
+    align-items: start;
+    padding: 10px 0;
+  }
+
+  .email-field-row input,
+  .email-body textarea {
+    padding: 4px 0 10px;
+    width: 100%;
+  }
+
+  .email-field-error {
+    margin-left: 0;
+  }
+
+  .email-body textarea {
+    min-height: 180px;
+  }
+
+  .crypto-qr-panel {
+    padding: 12px;
+  }
+
+  .crypto-qr-panel img {
+    width: min(240px, 100%);
+  }
+
+  .crypto-admin-actions,
+  .crypto-admin-meta small {
+    max-width: 100%;
   }
 }
