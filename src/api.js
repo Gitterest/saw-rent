@@ -52,15 +52,6 @@ export const api = {
   },
   createCryptoPayment(requestId, payload) {
     return send(`/public/requests/${requestId}/crypto-payment`, { method: "POST", body: payload })
-<<<<<<< HEAD
-  },
-  submitCryptoTxid(requestId, payload) {
-    return send(`/public/requests/${requestId}/crypto-payment/txid`, { method: "POST", body: payload })
-  },
-  adminSession() {
-    return send("/admin/session")
-=======
->>>>>>> c1aede9b8f7d84f60e30f8bb7cb06ec1b0943735
   },
   submitCryptoTxid(requestId, payload) {
     return send(`/public/requests/${requestId}/crypto-payment/txid`, { method: "POST", body: payload })

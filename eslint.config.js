@@ -27,29 +27,6 @@ export default defineConfig([
     },
   },
   {
-<<<<<<< HEAD
-    files: ['src/**/*.{js,jsx}'],
-    extends: [
-      js.configs.recommended,
-      reactHooks.configs.flat.recommended,
-      reactRefresh.configs.vite,
-    ],
-    languageOptions: {
-      ecmaVersion: 2020,
-      globals: globals.browser,
-      parserOptions: {
-        ecmaVersion: 'latest',
-        ecmaFeatures: { jsx: true },
-        sourceType: 'module',
-      },
-    },
-    rules: {
-      'no-unused-vars': ['error', { varsIgnorePattern: '^[A-Z_]' }],
-    },
-  },
-  {
-=======
->>>>>>> c1aede9b8f7d84f60e30f8bb7cb06ec1b0943735
     files: ['server/**/*.js', '*.config.js', 'tests/**/*.js'],
     extends: [js.configs.recommended],
     languageOptions: {

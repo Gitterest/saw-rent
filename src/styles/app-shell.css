@@ -58,6 +58,26 @@ video,
 canvas {
   max-width: 100%;
 }
+html,
+body,
+#root {
+  min-height: 100%;
+}
+
+body {
+  margin: 0;
+  font-family: Inter, system-ui, "Segoe UI", Roboto, sans-serif;
+  background: var(--graphite-black);
+  color: var(--paper-white);
+  line-height: 1.45;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
 
 a {
   color: inherit;
@@ -85,6 +105,11 @@ p {
   min-height: 100vh;
   min-height: 100dvh;
   width: 100%;
+  overflow: hidden;
+  background:
+.sr-shell {
+  position: relative;
+  min-height: 100vh;
   overflow: hidden;
   background:
     radial-gradient(circle at top center, rgba(249, 115, 22, 0.04), transparent 24%),
@@ -587,6 +612,11 @@ p {
   left: 0;
   right: 0;
   bottom: 0;
+.sr-taskbar {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
   height: var(--taskbar-height);
   border-top: 1px solid rgba(49, 56, 64, 0.86);
   background: rgba(20, 24, 27, 0.96);
@@ -638,6 +668,13 @@ p {
   overflow-y: hidden;
   scrollbar-width: thin;
   -webkit-overflow-scrolling: touch;
+}
+.sr-taskbar__apps {
+  min-width: 0;
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  overflow-y: hidden;
 }
 
 .sr-taskbar__app {
@@ -819,6 +856,12 @@ p {
   overflow-x: hidden;
   -webkit-overflow-scrolling: touch;
 }
+.sr-window__body {
+  flex: 1 1 auto;
+  min-height: 0;
+  padding: 16px;
+  overflow: auto;
+}
 
 .sr-window__footer {
   border-top: 1px solid rgba(42, 49, 56, 0.88);
@@ -973,6 +1016,15 @@ textarea {
   padding: 10px 12px;
   min-width: 0;
 }
+input,
+select,
+textarea {
+  border-radius: 6px;
+  border: 1px solid var(--soft-border);
+  background: rgba(20, 24, 27, 0.98);
+  color: var(--paper-white);
+  padding: 10px 12px;
+}
 
 input::placeholder,
 textarea::placeholder {
@@ -1035,6 +1087,22 @@ textarea {
     display: grid;
     grid-template-columns: 1fr;
     gap: 10px;
+  }
+
+  .sr-shell__console {
+    grid-column: 1;
+    width: 100%;
+@media (max-width: 959px) {
+  :root {
+    --taskbar-height: 58px;
+  }
+
+  .sr-shell__overlay {
+    position: static;
+    padding: 14px 14px 0;
+    inset: auto;
+    display: grid;
+    grid-template-columns: 1fr;
   }
 
   .sr-shell__console {
@@ -1301,6 +1369,90 @@ textarea {
 
   .sr-taskbar__system {
     display: none;
+  }
+}
+  .sr-shell__desktop {
+    padding: 14px 14px calc(var(--taskbar-height) + 14px);
+  }
+
+  .sr-shell__icons {
+    position: static;
+    width: auto;
+    grid-auto-flow: column;
+    grid-auto-columns: minmax(88px, 1fr);
+    overflow: auto;
+    margin-bottom: 12px;
+  }
+
+  .sr-shell__workspace {
+    min-height: calc(100vh - 190px - var(--taskbar-height));
+  }
+
+  .sr-launcher {
+    left: 8px;
+    right: 8px;
+    width: auto;
+  }
+
+  .sr-launcher__inner {
+    grid-template-columns: 1fr;
+  }
+
+  .sr-launcher__rail {
+    flex-direction: row;
+    border-right: 0;
+    border-bottom: 1px solid rgba(49, 56, 64, 0.8);
+  }
+
+  .sr-launcher__apps {
+    border-right: 0;
+    border-bottom: 1px solid rgba(49, 56, 64, 0.8);
+  }
+
+  .sr-taskbar {
+    grid-template-columns: auto auto minmax(0, 1fr) auto;
+  }
+
+  .sr-taskbar__app {
+    min-width: 52px;
+    padding: 0 12px;
+  }
+
+  .sr-taskbar__app-label,
+  .sr-taskbar__launcher span:last-child {
+    display: none;
+  }
+
+  .sr-window {
+    inset: 0 !important;
+    width: auto !important;
+    height: auto !important;
+    border-radius: 10px;
+    touch-action: auto;
+  }
+
+  .sr-window__header {
+    cursor: default;
+  }
+
+  .sr-window__resize-layer {
+    display: none;
+  }
+}
+
+@media (max-width: 640px) {
+  .sr-shell__desktop {
+    padding-left: 10px;
+    padding-right: 10px;
+  }
+
+  .sr-taskbar {
+    gap: 6px;
+    padding: 0 4px;
+  }
+
+  .sr-taskbar__system {
+    min-width: 82px;
   }
 }
 
