@@ -352,7 +352,7 @@ export function SawRentShell({
               onClick={item.onSelect}
             >
               <span className="sr-taskbar__app-icon" aria-hidden="true">{item.icon}</span>
-              <span className="sr-taskbar__app-label">{item.label}</span>
+              <span className="sr-taskbar__app-label">{item.appName || item.label}</span>
               <span className="sr-taskbar__app-indicator" aria-hidden="true" />
             </button>
           ))}

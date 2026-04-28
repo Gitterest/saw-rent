@@ -10,6 +10,7 @@
       "depositCents": 22000,
       "status": "available",
       "notes": "Balanced mid-size gas saw for firewood, cleanup, and general property work.",
+      "imageUrl": "/saws/placeholders/husqvarna-51.jpg",
       "createdAt": "2026-04-06T00:00:00.000Z",
       "updatedAt": "2026-04-07T00:00:00.000Z"
     },
@@ -23,6 +24,7 @@
       "depositCents": 22000,
       "status": "available",
       "notes": "Fast-handling farm and ranch saw with solid power for medium cutting jobs.",
+      "imageUrl": "/saws/placeholders/husqvarna-350.jpg",
       "createdAt": "2026-04-06T00:00:00.000Z",
       "updatedAt": "2026-04-07T00:00:00.000Z"
     },
@@ -36,6 +38,7 @@
       "depositCents": 24000,
       "status": "available",
       "notes": "Reliable torque-heavy option with old-school durable build for heavier cutting.",
+      "imageUrl": "/saws/placeholders/mcculloch-pro-mac-610.jpg",
       "createdAt": "2026-04-06T00:00:00.000Z",
       "updatedAt": "2026-04-07T00:00:00.000Z"
     },
@@ -49,6 +52,7 @@
       "depositCents": 15000,
       "status": "available",
       "notes": "Light-duty saw for trimming, small logs, and cleanup work.",
+      "imageUrl": "/saws/placeholders/husqvarna-23-compact.jpg",
       "createdAt": "2026-04-06T00:00:00.000Z",
       "updatedAt": "2026-04-07T00:00:00.000Z"
     },
@@ -62,6 +66,7 @@
       "depositCents": 16000,
       "status": "available",
       "notes": "Homeowner saw for light to medium jobs with straightforward handling.",
+      "imageUrl": "/saws/placeholders/husqvarna-141.jpg",
       "createdAt": "2026-04-06T00:00:00.000Z",
       "updatedAt": "2026-04-07T00:00:00.000Z"
     }
@@ -160,7 +165,7 @@
     "businessName": "Saw Rent",
     "contactPhone": "",
     "contactEmail": "",
-    "location": "",
+    "location": "LaPorte County / Northwest Indiana",
     "defaultPickupPreference": "pickup",
     "defaultRentalDays": 1,
     "maintenanceLeadDays": 3

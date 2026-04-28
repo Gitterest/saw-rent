@@ -13,13 +13,13 @@ const DEFAULT_SETTINGS = {
   businessName: "Saw Rent",
   contactPhone: "",
   contactEmail: "",
-  location: "",
+  location: "LaPorte County / Northwest Indiana",
   defaultPickupPreference: "pickup",
   defaultRentalDays: 1,
   maintenanceLeadDays: 3,
 }
 
-function createSaw({ name, category, barSize, engineCc, dailyRateCents, depositCents, status = "available", notes = "" }) {
+function createSaw({ name, category, barSize, engineCc, dailyRateCents, depositCents, status = "available", notes = "", imageUrl = "" }) {
   return {
     id: crypto.randomUUID(),
     name,
@@ -30,6 +30,7 @@ function createSaw({ name, category, barSize, engineCc, dailyRateCents, depositC
     depositCents,
     status,
     notes,
+    imageUrl,
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
   }
@@ -48,6 +49,7 @@ function createSeedState() {
         depositCents: 22000,
         status: "available",
         notes: "Good running mid-size saw",
+        imageUrl: "/saws/placeholders/husqvarna-51.jpg",
       }),
       createSaw({
         name: "Husqvarna 350",
@@ -58,6 +60,7 @@ function createSeedState() {
         depositCents: 22000,
         status: "available",
         notes: "more light in weight compared to 51",
+        imageUrl: "/saws/placeholders/husqvarna-350.jpg",
       }),
       createSaw({
         name: "McCulloch 610 Pro Mac",
@@ -68,6 +71,7 @@ function createSeedState() {
         depositCents: 20000,
         status: "available",
         notes: "Reliable torque-heavy option",
+        imageUrl: "/saws/placeholders/mcculloch-pro-mac-610.jpg",
       }),
       createSaw({
         name: "Husqvarna 23 Compact",
@@ -78,6 +82,7 @@ function createSeedState() {
         depositCents: 15000,
         status: "available",
         notes: "Light duty top handle saw",
+        imageUrl: "/saws/placeholders/husqvarna-23-compact.jpg",
       }),
       createSaw({
         name: "Husqvarna 141",
@@ -88,6 +93,7 @@ function createSeedState() {
         depositCents: 15000,
         status: "available",
         notes: "Light duty homeowner saw",
+        imageUrl: "/saws/placeholders/husqvarna-141.jpg",
       }),
     ],
     requests: [],

@@ -44,6 +44,8 @@ const __dirname = path.dirname(__filename)
 const ROOT_DIR = path.resolve(__dirname, "..")
 const DIST_DIR = path.join(ROOT_DIR, "dist")
 const PORT = Number(process.env.PORT || 5173)
+const DONATION_PAYPAL_URL = "https://www.paypal.me/bimmerpal"
+const PLACEHOLDER_ADDRESS_PATTERN = /\b(placeholder|replace|example|todo|not configured|unavailable)\b/i
 
 const stripeSecretKey = process.env.STRIPE_SECRET_KEY || ""
 const stripeWebhookSecret = process.env.STRIPE_WEBHOOK_SECRET || ""
@@ -86,6 +88,43 @@ function sanitizeSaw(saw) {
     depositCents: saw.depositCents,
     status: saw.status,
     notes: saw.notes,
+    imageUrl: saw.imageUrl || "",
+  }
+}
+
+function normalizeDonationAddress(value) {
+  const address = String(value || "").trim()
+  if (!address || PLACEHOLDER_ADDRESS_PATTERN.test(address)) {
+    return ""
+  }
+  return address
+}
+
+function getLatestPaymentAddress(state, currency) {
+  const source = [...state.requests, ...state.bookings].find(
+    (entry) => entry.cryptoCurrency === currency && normalizeDonationAddress(entry.cryptoAddress),
+  )
+  return normalizeDonationAddress(source?.cryptoAddress)
+}
+
+function buildDonationConfig(state, config = readCryptoConfig()) {
+  const btcStaticAddress = normalizeDonationAddress(config.receivingAddresses?.BTC)
+  const xmrStaticAddress = normalizeDonationAddress(config.receivingAddresses?.XMR)
+  const btcFallbackAddress = getLatestPaymentAddress(state, "BTC")
+  const xmrFallbackAddress = getLatestPaymentAddress(state, "XMR")
+
+  return {
+    paypalUrl: DONATION_PAYPAL_URL,
+    crypto: {
+      BTC: {
+        address: btcStaticAddress || btcFallbackAddress,
+        source: btcStaticAddress ? "static_crypto_payment_address" : (btcFallbackAddress ? "latest_crypto_payment_address" : ""),
+      },
+      XMR: {
+        address: xmrStaticAddress || xmrFallbackAddress,
+        source: xmrStaticAddress ? "static_crypto_payment_address" : (xmrFallbackAddress ? "latest_crypto_payment_address" : ""),
+      },
+    },
   }
 }
 
@@ -494,6 +533,15 @@ export function createApp({
     }
   })
 
+  app.get("/api/public/donations", async (_req, res, next) => {
+    try {
+      const state = await readState()
+      res.json(buildDonationConfig(state))
+    } catch (error) {
+      next(error)
+    }
+  })
+
   app.post("/api/public/requests", async (req, res, next) => {
     try {
       const { name, phone, sawId, startDate, endDate, pickupPreference, notes } = req.body || {}
@@ -502,6 +550,7 @@ export function createApp({
       assert(isPhoneLike(phone), 400, "Phone number is invalid.")
       assert(typeof sawId === "string" && sawId.trim().length > 0, 400, "Saw selection is required.")
       assert(isIsoDate(startDate) && isIsoDate(endDate), 400, "Start and end dates are required.")
+      assert(!pickupPreference || pickupPreference === "pickup", 400, "Pickup is the only supported preference.")
 
       const rentalDays = computeRentalDays(startDate, endDate)
       assert(rentalDays > 0, 400, "End date must be after or equal to start date.")
@@ -519,7 +568,7 @@ export function createApp({
           phone: String(phone || "").trim(),
           startDate,
           endDate,
-          pickupPreference: String(pickupPreference || "pickup").trim() || "pickup",
+          pickupPreference: "pickup",
           notes: String(notes || "").trim(),
           rentalDays,
           rentalTotalCents: Number(saw.dailyRateCents) * rentalDays,

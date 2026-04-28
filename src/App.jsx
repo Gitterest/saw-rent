@@ -6,6 +6,8 @@ import { PublicWorkspace } from "./features/public/PublicWorkspace"
 import "./styles/app-shell.css"
 import "./App.css"
 
+const DEFAULT_LOCATION_LABEL = "LaPorte County / Northwest Indiana"
+
 function toSafeArray(value) {
   return Array.isArray(value) ? value : []
 }
@@ -39,10 +41,8 @@ function normalizeSettings(value) {
     businessName: toSafeString(source.businessName, "Saw Rent"),
     contactPhone: toSafeString(source.contactPhone),
     contactEmail: toSafeString(source.contactEmail),
-    location: toSafeString(source.location),
-    defaultPickupPreference: ["pickup", "dropoff", "flexible"].includes(source.defaultPickupPreference)
-      ? source.defaultPickupPreference
-      : "pickup",
+    location: toSafeString(source.location, DEFAULT_LOCATION_LABEL) || DEFAULT_LOCATION_LABEL,
+    defaultPickupPreference: "pickup",
     defaultRentalDays: Number.isFinite(defaultRentalDays) && defaultRentalDays >= 1 ? defaultRentalDays : 1,
     maintenanceLeadDays: Number.isFinite(maintenanceLeadDays) && maintenanceLeadDays >= 0 ? maintenanceLeadDays : 3,
   }
@@ -60,6 +60,7 @@ function normalizeSaw(entry, index) {
     depositCents: Number(saw.depositCents || 0),
     status: normalizeStatusValue(saw.status),
     notes: toSafeString(saw.notes, "No additional notes."),
+    imageUrl: toSafeString(saw.imageUrl),
   }
 }
 
@@ -155,7 +156,7 @@ function PublicApp() {
           const nextStartDate = current.startDate || tomorrowIso()
           return {
             ...current,
-            pickupPreference: nextSettings.defaultPickupPreference,
+            pickupPreference: "pickup",
             endDate: addDaysIso(nextStartDate, Math.max(0, nextSettings.defaultRentalDays - 1)),
           }
         })
@@ -211,7 +212,7 @@ function PublicApp() {
         throw new Error("No saw is available for the selected rental request.")
       }
 
-      const { request } = await api.createRequest({ ...form, sawId: selectedSaw.id })
+      const { request } = await api.createRequest({ ...form, sawId: selectedSaw.id, pickupPreference: "pickup" })
       setSubmittedRequest(request)
       setForm((current) => ({
         ...current,

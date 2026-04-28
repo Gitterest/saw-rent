@@ -15,19 +15,38 @@ import {
   submitContactEmail,
   validateContactDraft,
 } from "../../lib/contactSubmission"
+import {
+  DONATION_METHODS,
+  PAYPAL_DONATION_URL,
+  fetchDonationConfig,
+  normalizeDonationConfig,
+} from "../../lib/donationConfig"
 
 const PUBLIC_MODULES = [
   { key: "dispatch", label: "Chainsaws", icon: "SAWS", size: "wide", description: "Availability, rates, and saw details" },
   { key: "reservation", label: "Chainsaw Rentals", icon: "RENT", size: "tall", description: "Request rental dates and complete the deposit flow" },
-  { key: "crypto", label: "Crypto Payment Option", icon: "CP", size: "standard", description: "BTC and XMR rental deposit instructions" },
+  { key: "crypto", label: "Crypto Payment", icon: "CP", size: "standard", description: "BTC and XMR rental deposit instructions" },
+  { key: "donate", label: "Donate", icon: "GIVE", size: "standard", description: "Support Saw Rent with PayPal, BTC, or XMR" },
   { key: "briefing", label: "Pickup Notes", icon: "NOTES", size: "standard", description: "Process, pricing, and pickup instructions", side: "right" },
   { key: "about", label: "ABOUT US", icon: "SFC", size: "wide", description: "Saw Rent and SoFlipCo business details" },
   { key: "email", label: "EMAIL", icon: "MAIL", size: "wide", description: "Compose a message to Saw Rent", side: "right" },
 ]
 
 const DEFAULT_PUBLIC_WINDOWS = []
-const ABOUT_US_COPY = "Saw Rent is a chainsaw rental platform created by SoFlipCo. As a small local business, we offer chainsaw rentals at competitive prices with flexible payment options. We accept cash, card, and crypto, along with many other payment methods including PayPal, Chime, Venmo, Zelle, Cash App, Apple Pay, and Google Pay."
+const LOCATION_LABEL = "LaPorte County / Northwest Indiana"
+const ABOUT_US_COPY = "Saw Rent is a chainsaw rental platform created by SoFlipCo for LaPorte County and Northwest Indiana. As a small local business, we offer chainsaw rentals at competitive prices with flexible payment options. We accept cash, card, and crypto, along with many other payment methods including PayPal, Chime, Venmo, Zelle, Cash App, Apple Pay, and Google Pay."
 const ABOUT_PAYMENT_METHODS = ["Cash", "Card", "Crypto", "PayPal", "Chime", "Venmo", "Zelle", "Cash App", "Apple Pay", "Google Pay"]
+const SAW_IMAGE_FALLBACKS = {
+  "saw-husqvarna-51": "/saws/placeholders/husqvarna-51.jpg",
+  "saw-husqvarna-350": "/saws/placeholders/husqvarna-350.jpg",
+  "saw-promac-610": "/saws/placeholders/mcculloch-pro-mac-610.jpg",
+  "saw-husqvarna-23-compact": "/saws/placeholders/husqvarna-23-compact.jpg",
+  "saw-husqvarna-141": "/saws/placeholders/husqvarna-141.jpg",
+}
+
+function getSawImageUrl(saw) {
+  return saw?.imageUrl || SAW_IMAGE_FALLBACKS[saw?.id] || "/saws/placeholders/husqvarna-51.jpg"
+}
 
 function ContactActionLinks({ variant = "default" }) {
   return (
@@ -101,7 +120,7 @@ function PublicMetrics({ saws, availableSaws, paymentsEnabled }) {
   )
 }
 
-function FleetBoard({ saws, availableSaws, selectedSaw, paymentsEnabled }) {
+function FleetBoard({ saws, availableSaws, selectedSaw, paymentsEnabled, onSelectSaw }) {
   return (
     <div className="window-stack">
       <PublicMetrics saws={saws} availableSaws={availableSaws} paymentsEnabled={paymentsEnabled} />
@@ -115,34 +134,33 @@ function FleetBoard({ saws, availableSaws, selectedSaw, paymentsEnabled }) {
             <span className="sr-badge tone-neutral">{availableSaws.length} available</span>
           </div>
 
-          <div className="inventory-table">
-            <div className="inventory-table__header">
-              <span>Unit</span>
-              <span>Spec</span>
-              <span>Daily rate</span>
-              <span>Status</span>
-            </div>
-            {saws.map((saw) => (
-              <div key={saw.id} className="inventory-table__row">
-                <div>
-                  <strong>{saw.name}</strong>
-                  <small>{saw.category}</small>
-                </div>
-                <div>
-                  <strong>{saw.barSize}</strong>
-                  <small>{saw.engineCc ? `${saw.engineCc}cc` : "No engine data"}</small>
-                </div>
-                <div>
-                  <strong>{formatMoney(saw.dailyRateCents)}</strong>
-                  <small>{formatMoney(saw.depositCents)} deposit</small>
-                </div>
-                <div>
-                  <span className={`status-pill tone-${getStatusTone(saw.status)}`}>
-                    {normalizeStatusLabel(saw.status)}
+          <div className="saw-catalog" aria-label="Chainsaw visual catalog">
+            {saws.map((saw) => {
+              const selected = selectedSaw?.id === saw.id
+              return (
+                <button
+                  key={saw.id}
+                  type="button"
+                  className={`saw-catalog-card ${selected ? "is-selected" : ""}`}
+                  onClick={() => onSelectSaw?.(saw.id)}
+                  aria-pressed={selected ? "true" : "false"}
+                >
+                  <span className="saw-catalog-card__image">
+                    <img src={getSawImageUrl(saw)} alt="" loading="lazy" />
                   </span>
-                </div>
-              </div>
-            ))}
+                  <span className="saw-catalog-card__body">
+                    <span className="saw-catalog-card__topline">
+                      <strong>{saw.name}</strong>
+                      <span className={`status-pill tone-${getStatusTone(saw.status)}`}>
+                        {normalizeStatusLabel(saw.status)}
+                      </span>
+                    </span>
+                    <span className="saw-catalog-card__spec">{saw.category} | {saw.barSize} | {saw.engineCc ? `${saw.engineCc}cc` : "Engine N/A"}</span>
+                    <span className="saw-catalog-card__rate">{formatMoney(saw.dailyRateCents)} / day</span>
+                  </span>
+                </button>
+              )
+            })}
           </div>
         </div>
 
@@ -159,6 +177,7 @@ function FleetBoard({ saws, availableSaws, selectedSaw, paymentsEnabled }) {
 
           {selectedSaw ? (
             <div className="inspector-card">
+              <img className="inspector-card__image" src={getSawImageUrl(selectedSaw)} alt="" />
               <dl className="detail-list">
                 <div>
                   <dt>Category</dt>
@@ -269,10 +288,8 @@ function ReservationDesk({
             </label>
             <label>
               <span>Pickup preference</span>
-              <select value={form.pickupPreference} onChange={(event) => updateForm("pickupPreference", event.target.value)} required>
+              <select value="pickup" onChange={(event) => updateForm("pickupPreference", event.target.value)} required>
                 <option value="pickup">Pickup</option>
-                <option value="dropoff">Dropoff</option>
-                <option value="flexible">Flexible</option>
               </select>
             </label>
             <label>
@@ -291,7 +308,6 @@ function ReservationDesk({
               value={form.notes}
               onChange={(event) => updateForm("notes", event.target.value)}
               rows={4}
-              placeholder="Crew timing, wood type, access notes, or return constraints"
             />
           </label>
 
@@ -683,7 +699,7 @@ function PickupBriefing({ paymentsEnabled, selectedSaw, availableSaws, submitted
           <h3>Counter workflow</h3>
           <ol className="step-list">
             <li>Choose a ready chainsaw from the Chainsaws window.</li>
-            <li>Submit one request with your preferred dates and pickup mode.</li>
+            <li>Submit one request with your preferred dates and pickup timing.</li>
             <li>{paymentsEnabled ? "Pay the deposit online to hold queue priority." : "The rental desk will arrange deposit collection after approval."}</li>
           </ol>
         </article>
@@ -724,7 +740,7 @@ function PickupBriefing({ paymentsEnabled, selectedSaw, availableSaws, submitted
           </div>
           <div>
             <dt>Location</dt>
-            <dd>{settings.location || "Rental counter"}</dd>
+            <dd>{settings.location || LOCATION_LABEL}</dd>
           </div>
         </div>
       </article>
@@ -788,9 +804,103 @@ function AboutUsWindow() {
             <h3>Talk with Saw Rent</h3>
             <p className="section-detail">Call or text the rental desk for saw availability, pickup timing, payment questions, or SoFlipCo support.</p>
           </div>
-          <span className="sr-badge tone-success">Direct line</span>
+          <a className="button button-primary" href={PAYPAL_DONATION_URL} target="_blank" rel="noreferrer">
+            DONATE
+          </a>
         </div>
         <ContactActionLinks />
+      </section>
+    </div>
+  )
+}
+
+function DonationWindow() {
+  const [donationConfig, setDonationConfig] = useState(() => normalizeDonationConfig())
+  const [loadState, setLoadState] = useState("loading")
+  const [copyNotice, setCopyNotice] = useState("")
+
+  useEffect(() => {
+    let alive = true
+
+    fetchDonationConfig()
+      .then((config) => {
+        if (!alive) return
+        setDonationConfig(config)
+        setLoadState("ready")
+      })
+      .catch(() => {
+        if (!alive) return
+        setDonationConfig(normalizeDonationConfig())
+        setLoadState("error")
+      })
+
+    return () => {
+      alive = false
+    }
+  }, [])
+
+  async function copyDonationAddress(currency) {
+    const address = donationConfig.crypto[currency]?.address || ""
+    if (!address) return
+
+    try {
+      await navigator.clipboard.writeText(address)
+      setCopyNotice(`${currency} donation address copied`)
+    } catch {
+      setCopyNotice("Copy failed")
+    }
+  }
+
+  return (
+    <div className="donation-app">
+      <section className="donation-hero">
+        <div>
+          <p className="section-eyebrow">Support Saw Rent</p>
+          <h3>DONATE</h3>
+          <p>Help keep local chainsaw rentals available across {LOCATION_LABEL}. PayPal, BTC, and XMR are supported when configured.</p>
+        </div>
+        <a className="button button-primary" href={donationConfig.paypalUrl} target="_blank" rel="noreferrer">
+          Donate with PayPal
+        </a>
+      </section>
+
+      {loadState === "error" ? (
+        <div className="notice-banner">Crypto donation addresses could not be loaded. PayPal is still available.</div>
+      ) : null}
+      {copyNotice ? <div className="notice-banner">{copyNotice}</div> : null}
+
+      <section className="donation-method-grid" aria-label="Donation methods">
+        {DONATION_METHODS.map((method) => {
+          if (method.type === "link") {
+            return (
+              <a key={method.key} className="donation-method-card" href={donationConfig.paypalUrl} target="_blank" rel="noreferrer">
+                <span>{method.label}</span>
+                <strong>PayPal donation</strong>
+                <small>{donationConfig.paypalUrl}</small>
+              </a>
+            )
+          }
+
+          const address = donationConfig.crypto[method.key]?.address || ""
+          const source = donationConfig.crypto[method.key]?.source || ""
+
+          return (
+            <article key={method.key} className="donation-method-card">
+              <span>{method.label}</span>
+              <strong>{address ? "Crypto donation address" : "Address not configured"}</strong>
+              <code>{address || "Configure this receive address before accepting donations."}</code>
+              {source ? <small>{normalizeStatusLabel(source)}</small> : null}
+              <button
+                type="button"
+                className="button button-secondary"
+                onClick={() => copyDonationAddress(method.key)}
+                disabled={!address}
+              >
+                Copy {method.label}
+              </button>
+            </article>
+          )
+        })}
       </section>
     </div>
   )
@@ -973,7 +1083,6 @@ export function PublicWorkspace({
 }) {
   const [launcherOpen, setLauncherOpen] = useState(false)
   const [launcherQuery, setLauncherQuery] = useState("")
-  const [workspaceNotice, setWorkspaceNotice] = useState("")
   const {
     openWindows,
     minimizedWindows,
@@ -1001,9 +1110,8 @@ export function PublicWorkspace({
     setLauncherQuery("")
   }
 
-  function runWorkspaceAction(action, messages) {
-    const result = action()
-    setWorkspaceNotice(result.ok ? messages.success : messages.empty)
+  function runWorkspaceAction(action) {
+    action()
     closeLauncher()
   }
 
@@ -1046,6 +1154,17 @@ export function PublicWorkspace({
       group: "Apps",
       onSelect: () => {
         focusWindow("crypto")
+        closeLauncher()
+      },
+    },
+    {
+      key: "donate",
+      icon: "GIVE",
+      label: "Donate",
+      description: "Support Saw Rent with PayPal, BTC, or XMR",
+      group: "Apps",
+      onSelect: () => {
+        focusWindow("donate")
         closeLauncher()
       },
     },
@@ -1098,10 +1217,7 @@ export function PublicWorkspace({
       label: "Restore Workspace",
       description: "Reopen the saved window layout on demand",
       group: "Workspace",
-      onSelect: () => runWorkspaceAction(restoreWorkspace, {
-        success: "Workspace restored",
-        empty: "No saved workspace",
-      }),
+      onSelect: () => runWorkspaceAction(restoreWorkspace),
     },
     {
       key: "clear-workspace",
@@ -1109,10 +1225,7 @@ export function PublicWorkspace({
       label: "Clear Workspace",
       description: "Close all app windows without changing data",
       group: "Workspace",
-      onSelect: () => runWorkspaceAction(clearWorkspace, {
-        success: "Workspace cleared",
-        empty: "Workspace already clear",
-      }),
+      onSelect: () => runWorkspaceAction(clearWorkspace),
     },
     {
       key: "tile-windows",
@@ -1120,10 +1233,7 @@ export function PublicWorkspace({
       label: "Tile Windows",
       description: "Arrange visible windows into a practical grid",
       group: "Workspace",
-      onSelect: () => runWorkspaceAction(tileVisibleWindows, {
-        success: "Visible windows tiled",
-        empty: "No visible windows",
-      }),
+      onSelect: () => runWorkspaceAction(tileVisibleWindows),
     },
     {
       key: "reset-window-positions",
@@ -1131,10 +1241,7 @@ export function PublicWorkspace({
       label: "Reset Window Positions",
       description: "Move open windows back to safe default frames",
       group: "Workspace",
-      onSelect: () => runWorkspaceAction(resetWindowPositions, {
-        success: "Window positions reset",
-        empty: "No open windows",
-      }),
+      onSelect: () => runWorkspaceAction(resetWindowPositions),
     },
   ].filter((item) => {
     if (!launcherQueryValue) return true
@@ -1176,6 +1283,15 @@ export function PublicWorkspace({
       label: "Crypto Payment",
       onSelect: () => {
         focusWindow("crypto")
+        closeLauncher()
+      },
+    },
+    {
+      key: "donate-rail",
+      icon: "GIVE",
+      label: "Donate",
+      onSelect: () => {
+        focusWindow("donate")
         closeLauncher()
       },
     },
@@ -1245,6 +1361,15 @@ export function PublicWorkspace({
       onSelect: () => focusWindow("crypto"),
     },
     {
+      key: "donate",
+      icon: "GIVE",
+      label: "Donate",
+      meta: "PayPal / BTC / XMR",
+      active: activeWindow === "donate",
+      running: openWindows.includes("donate"),
+      onSelect: () => focusWindow("donate"),
+    },
+    {
       key: "about",
       icon: "SFC",
       label: "ABOUT US",
@@ -1271,6 +1396,7 @@ export function PublicWorkspace({
       key,
       icon: module?.icon || "SR",
       label: module?.label || key,
+      appName: module?.label || key,
       active: activeWindow === key,
       minimized: minimizedWindows.includes(key),
       onSelect: () => toggleTaskbarWindow(key),
@@ -1280,7 +1406,7 @@ export function PublicWorkspace({
   return (
     <SawRentShell
       brand={settings.businessName || "SoFlipCo.com"}
-      subtitle={settings.location || "Rent a chainsaw today!"}
+      subtitle={settings.location || LOCATION_LABEL}
       shellLabel="Saw Rent"
       desktopItems={desktopItems}
       launcherItems={launcherItems}
@@ -1292,10 +1418,9 @@ export function PublicWorkspace({
       onToggleLauncher={() => setLauncherOpen((current) => !current)}
       taskbarItems={taskbarItems}
       systemBadges={[
-        { label: `${availableSaws.length} ready units`, tone: "success" },
-        { label: paymentsEnabled ? "Deposit checkout live" : "Manual deposits", tone: paymentsEnabled ? "warning" : "neutral" },
-        { label: cryptoPaymentsEnabled ? "Crypto deposits ready" : "Crypto offline", tone: cryptoPaymentsEnabled ? "info" : "neutral" },
-        ...(workspaceNotice ? [{ label: workspaceNotice, tone: "neutral" }] : []),
+        { label: "Rent a chainsaw today!", tone: "success" },
+        { label: "Crypto payment Optional", tone: "info" },
+        { label: "SoFlipCo", tone: "neutral" },
       ]}
     >
       <div className="window-grid window-grid--public">
@@ -1319,7 +1444,13 @@ export function PublicWorkspace({
                 onToggleMaximize={() => toggleMaximizeWindow("dispatch")}
                 onClose={() => closeWindow("dispatch")}
               >
-                <FleetBoard saws={saws} availableSaws={availableSaws} selectedSaw={selectedSaw} paymentsEnabled={paymentsEnabled} />
+                <FleetBoard
+                  saws={saws}
+                  availableSaws={availableSaws}
+                  selectedSaw={selectedSaw}
+                  paymentsEnabled={paymentsEnabled}
+                  onSelectSaw={(sawId) => updateForm("sawId", sawId)}
+                />
               </WindowSurface>
             )
           }
@@ -1416,6 +1547,30 @@ export function PublicWorkspace({
                 onClose={() => closeWindow("about")}
               >
                 <AboutUsWindow />
+              </WindowSurface>
+            )
+          }
+
+          if (windowState.key === "donate") {
+            return (
+              <WindowSurface
+                key="donate"
+                windowKey="donate"
+                title="Donate"
+                subtitle="PayPal, BTC, and XMR support"
+                icon="GIVE"
+                size="standard"
+                frame={windowState.frame}
+                zIndex={windowState.zIndex}
+                active={windowState.active}
+                minimized={windowState.minimized}
+                onFocus={() => focusWindow("donate")}
+                onFrameChange={(nextFrame) => updateFrame("donate", nextFrame)}
+                onMinimize={() => minimizeWindow("donate")}
+                onToggleMaximize={() => toggleMaximizeWindow("donate")}
+                onClose={() => closeWindow("donate")}
+              >
+                <DonationWindow />
               </WindowSurface>
             )
           }
