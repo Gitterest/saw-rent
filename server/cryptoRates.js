@@ -10,6 +10,7 @@ export const CRYPTO_USD_RATE_PAIRS = {
 function rateProviderError(message, status = 503) {
   const error = new Error(message)
   error.status = status
+  error.expose = true
   return error
 }
 

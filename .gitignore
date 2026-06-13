@@ -7,41 +7,33 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
+# Dependencies and generated web output
 node_modules
 dist
 dist-ssr
 .npm-cache
 .tmp-npm-cache
+.local-jbr
+.tools
+.gradle-home
+.android-home
 .vercel
+
+# Test output
 playwright-report
 test-results
+.tmp-smoke
+
+# Environment files
 *.local
-<<<<<<< HEAD
 .env
 .env.*
 !.env.example
 
-.env
-.env.*
-!.env.example
-
-# Editor directories and files
-.vscode/*
-!.vscode/extensions.json
-.idea
-.DS_Store
-*.suo
-*.ntvs*
-*.njsproj
-*.sln
-=======
-.env
-.env.*
-!.env.example
-
-.env
-.env.*
-!.env.example
+# Android signing material
+android/keystore.properties
+*.jks
+*.keystore
 
 # Editor directories and files
 .vscode/*
@@ -52,5 +44,4 @@ test-results
 *.ntvs*
 *.njsproj
 *.sln
->>>>>>> c1aede9b8f7d84f60e30f8bb7cb06ec1b0943735
 *.sw?

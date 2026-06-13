@@ -1,20 +1,27 @@
-function normalizeRoot(value, fallback = "/api") {
-  const raw = String(value || "").trim()
-  if (!raw) return fallback
-  return raw.endsWith("/") ? raw.slice(0, -1) : raw
-}
+import { BACKEND_UNAVAILABLE_MESSAGE, getApiRoot } from "./runtimeConfig"
 
-const API_ROOT = normalizeRoot(import.meta.env.VITE_API_ROOT, "/api")
+const API_ROOT = getApiRoot()
 
-async function parseResponse(response) {
+async function readPayload(response) {
   const contentType = response.headers.get("content-type") || ""
-  const payload = contentType.includes("application/json") ? await response.json() : null
-
-  if (!response.ok) {
-    throw new Error(payload?.error || `Request failed (${response.status}).`)
+  if (!contentType.includes("application/json")) {
+    return null
   }
 
-  return payload
+  try {
+    return await response.json()
+  } catch {
+    return null
+  }
+}
+
+async function parseResponse(response, payload = undefined) {
+  const responsePayload = payload === undefined ? await readPayload(response) : payload
+  if (!response.ok) {
+    throw new Error(responsePayload?.error || `Request failed (${response.status}).`)
+  }
+
+  return responsePayload
 }
 
 async function send(path, { method = "GET", body } = {}) {
@@ -27,14 +34,31 @@ async function send(path, { method = "GET", body } = {}) {
     body: body ? JSON.stringify(body) : undefined,
   }
 
-  const response = await fetch(`${API_ROOT}${path}`, request)
+  let response
+  try {
+    response = await fetch(`${API_ROOT}${path}`, request)
+  } catch {
+    throw new Error(BACKEND_UNAVAILABLE_MESSAGE)
+  }
 
+  let payload
   if (response.status === 404 && API_ROOT === "/api") {
-    const fallbackResponse = await fetch(path, request)
+    payload = await readPayload(response.clone())
+    const shouldTryLegacyPath = !payload || payload.error === "API endpoint not found."
+    if (!shouldTryLegacyPath) {
+      return parseResponse(response, payload)
+    }
+
+    let fallbackResponse
+    try {
+      fallbackResponse = await fetch(path, request)
+    } catch {
+      throw new Error(BACKEND_UNAVAILABLE_MESSAGE)
+    }
     return parseResponse(fallbackResponse)
   }
 
-  return parseResponse(response)
+  return parseResponse(response, payload)
 }
 
 export const api = {

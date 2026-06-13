@@ -24,7 +24,7 @@ app.use((req, res, next) => {
 app.use((error, _req, res, next) => {
   void next
   const status = Number(error?.status || 500)
-  const message = status >= 500 ? "Internal server error." : error.message
+  const message = error?.expose || status < 500 ? error.message : "Internal server error."
   res.status(status).json({ error: message })
 })
 

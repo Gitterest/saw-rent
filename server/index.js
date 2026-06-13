@@ -46,10 +46,47 @@ const DIST_DIR = path.join(ROOT_DIR, "dist")
 const PORT = Number(process.env.PORT || 5173)
 const DONATION_PAYPAL_URL = "https://www.paypal.me/bimmerpal"
 const PLACEHOLDER_ADDRESS_PATTERN = /\b(placeholder|replace|example|todo|not configured|unavailable)\b/i
+const DEFAULT_ALLOWED_CLIENT_ORIGINS = [
+  "https://soflipco.com",
+  "https://www.soflipco.com",
+  "https://localhost",
+  "capacitor://localhost",
+]
+const LOCAL_DEVELOPMENT_ORIGIN_HOSTS = new Set(["localhost", "127.0.0.1", "10.0.2.2"])
 
 const stripeSecretKey = process.env.STRIPE_SECRET_KEY || ""
 const stripeWebhookSecret = process.env.STRIPE_WEBHOOK_SECRET || ""
 const stripeClient = stripeSecretKey ? new Stripe(stripeSecretKey) : null
+
+function readAllowedClientOrigins() {
+  const configured = [
+    process.env.CLIENT_ALLOWED_ORIGINS,
+    process.env.MOBILE_ALLOWED_ORIGINS,
+  ]
+    .filter(Boolean)
+    .flatMap((value) => String(value).split(","))
+    .map((value) => value.trim())
+    .filter(Boolean)
+
+  return new Set([...DEFAULT_ALLOWED_CLIENT_ORIGINS, ...configured])
+}
+
+const allowedClientOrigins = readAllowedClientOrigins()
+
+function isLocalDevelopmentOrigin(origin) {
+  if (process.env.NODE_ENV === "production") return false
+
+  try {
+    const url = new URL(origin)
+    return ["http:", "https:"].includes(url.protocol) && LOCAL_DEVELOPMENT_ORIGIN_HOSTS.has(url.hostname)
+  } catch {
+    return false
+  }
+}
+
+function isAllowedClientOrigin(origin) {
+  return allowedClientOrigins.has(origin) || isLocalDevelopmentOrigin(origin)
+}
 
 const BOOKING_TRANSITIONS = {
   requested: "approved",
@@ -73,22 +110,39 @@ function assert(condition, status, message) {
   if (!condition) {
     const error = new Error(message)
     error.status = status
+    error.expose = true
     throw error
   }
 }
 
+function getErrorMessage(error, status) {
+  if (error?.expose || (Number.isFinite(status) && status < 500)) {
+    return error.message
+  }
+
+  return "Internal server error."
+}
+
 function sanitizeSaw(saw) {
+  const image = saw.image || saw.imageUrl || ""
+  const type = saw.type || saw.category || ""
   return {
     id: saw.id,
     name: saw.name,
-    category: saw.category,
+    brand: saw.brand || "",
+    model: saw.model || "",
+    category: type,
+    type,
     barSize: saw.barSize,
     engineCc: saw.engineCc,
     dailyRateCents: saw.dailyRateCents,
+    dailyPrice: saw.dailyPrice || saw.dailyRateCents,
     depositCents: saw.depositCents,
+    deposit: saw.deposit || saw.depositCents,
     status: saw.status,
     notes: saw.notes,
-    imageUrl: saw.imageUrl || "",
+    image,
+    imageUrl: image,
   }
 }
 
@@ -427,6 +481,25 @@ export function createApp({
   app.disable("x-powered-by")
   app.locals.cryptoMonitorRunner = monitorRunner
   app.locals.cryptoMonitorScheduler = monitorScheduler
+
+  app.use((req, res, next) => {
+    const origin = String(req.headers.origin || "")
+    if (origin && isAllowedClientOrigin(origin)) {
+      res.setHeader("Access-Control-Allow-Origin", origin)
+      res.setHeader("Access-Control-Allow-Credentials", "true")
+      res.setHeader("Vary", "Origin")
+    }
+
+    res.setHeader("Access-Control-Allow-Methods", "GET,POST,PATCH,OPTIONS")
+    res.setHeader("Access-Control-Allow-Headers", "Content-Type, Stripe-Signature")
+
+    if (req.method === "OPTIONS") {
+      res.sendStatus(204)
+      return
+    }
+
+    next()
+  })
 
   app.get("/api/health", (_req, res) => {
     res.json({ ok: true })
@@ -1297,7 +1370,7 @@ export async function startServer({ port = PORT } = {}) {
   app.use((error, _req, res, next) => {
     void next
     const status = Number(error?.status || 500)
-    const message = status >= 500 ? "Internal server error." : error.message
+    const message = getErrorMessage(error, status)
     res.status(status).json({ error: message })
   })
 

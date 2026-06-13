@@ -28,10 +28,17 @@ function safeCompare(a, b) {
   return crypto.timingSafeEqual(left, right)
 }
 
+function authConfigurationError(message) {
+  const error = new Error(message)
+  error.status = 503
+  error.expose = true
+  return error
+}
+
 function getSessionSecret() {
   const secret = process.env.ADMIN_SESSION_SECRET
   if (!secret || secret.length < 24) {
-    throw new Error("ADMIN_SESSION_SECRET must be set with at least 24 characters.")
+    throw authConfigurationError("Admin session secret is not configured.")
   }
 
   return secret
@@ -44,7 +51,7 @@ function signSessionPayload(payload, secret) {
 export function verifyAdminPassword(password) {
   const configured = process.env.ADMIN_PASSWORD
   if (!configured) {
-    throw new Error("ADMIN_PASSWORD must be set in environment.")
+    throw authConfigurationError("Admin password is not configured.")
   }
 
   return safeCompare(configured, String(password || ""))
@@ -89,7 +96,7 @@ export function readSessionToken(token) {
 export function setAdminCookie(res, token) {
   res.cookie(COOKIE_NAME, token, {
     httpOnly: true,
-    sameSite: "strict",
+    sameSite: process.env.ADMIN_COOKIE_SAMESITE || (process.env.NODE_ENV === "production" ? "none" : "lax"),
     secure: process.env.NODE_ENV === "production",
     maxAge: SESSION_TTL_MS,
     path: "/",
@@ -99,7 +106,7 @@ export function setAdminCookie(res, token) {
 export function clearAdminCookie(res) {
   res.clearCookie(COOKIE_NAME, {
     httpOnly: true,
-    sameSite: "strict",
+    sameSite: process.env.ADMIN_COOKIE_SAMESITE || (process.env.NODE_ENV === "production" ? "none" : "lax"),
     secure: process.env.NODE_ENV === "production",
     path: "/",
   })

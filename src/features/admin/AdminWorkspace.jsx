@@ -48,7 +48,7 @@ function readAdminBootIntent() {
 
   return {
     restoreFromStorage: ["1", "true", "yes"].includes(restoreValue),
-    moduleKey: launchValue === "module" && isValidModuleKey(requestedModule) ? requestedModule : "",
+    moduleKey: (launchValue === "module" || requestedModule) && isValidModuleKey(requestedModule) ? requestedModule : "",
   }
 }
 
@@ -1668,7 +1668,8 @@ export function AdminWorkspace({
     storageKey: WORKSPACE_STORAGE_KEY,
     legacyStorageKeys: LEGACY_WORKSPACE_STORAGE_KEYS,
     restoreFromStorage: bootIntent.restoreFromStorage,
-    syncUrl: false,
+    restoreFromUrl: true,
+    syncUrl: true,
     urlParamName: MODULE_QUERY_PARAM,
   })
 

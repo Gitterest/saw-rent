@@ -32,6 +32,10 @@ const RECOVERABLE_EDGE = 80
 
 const RESIZE_DIRECTIONS = ["top", "right", "bottom", "left", "top-left", "top-right", "bottom-right", "bottom-left"]
 
+function usesTouchWindowMode() {
+  return window.matchMedia("(max-width: 959px), (pointer: coarse)").matches
+}
+
 function clampFrameToWorkspace(frame, bounds) {
   const maxWidth = Math.max(MIN_WINDOW_WIDTH, bounds.width + RECOVERABLE_EDGE)
   const maxHeight = Math.max(MIN_WINDOW_HEIGHT, bounds.height + RECOVERABLE_EDGE)
@@ -114,6 +118,7 @@ export function SawRentShell({
   onLauncherQueryChange,
   onToggleLauncher,
   taskbarItems,
+  taskbarActions = [],
   systemBadges,
   children,
 }) {
@@ -359,6 +364,20 @@ export function SawRentShell({
         </div>
 
         <div className="sr-taskbar__system">
+          {taskbarActions.map((action) => (
+            <button
+              key={action.key}
+              type="button"
+              className={[
+                "sr-taskbar__action",
+                action.tone ? `tone-${action.tone}` : "",
+                action.active ? "is-active" : "",
+              ].filter(Boolean).join(" ")}
+              onClick={action.onSelect}
+            >
+              {action.label}
+            </button>
+          ))}
           <div className="sr-taskbar__meter">
             <strong>{formatTaskbarTime(clock)}</strong>
             <span>{formatTaskbarDay(clock)}</span>
@@ -396,7 +415,7 @@ export function WindowSurface({
   useEffect(() => () => cleanupRef.current?.(), [])
 
   useEffect(() => {
-    if (!frame || frame.maximized || !onFrameChange || window.matchMedia("(max-width: 959px)").matches) {
+    if (!frame || frame.maximized || !onFrameChange || usesTouchWindowMode()) {
       return
     }
 
@@ -446,7 +465,7 @@ export function WindowSurface({
     event.preventDefault()
     onFocus?.()
 
-    if (!frame || !onFrameChange || window.matchMedia("(max-width: 959px)").matches) {
+    if (!frame || !onFrameChange || usesTouchWindowMode()) {
       return
     }
 

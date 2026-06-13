@@ -14,9 +14,16 @@ Full-stack chainsaw rental app with:
 
 Create `.env` in project root (or use your deployment provider env settings).
 
-Required variables:
+Public client variables:
 
-- `VITE_STRIPE_PUBLISHABLE_KEY`
+- `VITE_API_BASE_URL` / `VITE_API_ROOT` (optional for web; defaults to `/api`)
+- `VITE_ANDROID_API_BASE_URL` / `VITE_ANDROID_API_ROOT` (Android HTTPS API root; defaults to `https://soflipco.com/api`)
+- `VITE_PUBLIC_APP_ORIGIN` (Android checkout return origin; defaults to `https://soflipco.com`)
+- `VITE_ALLOW_LOCAL_API=true` (debug builds only, for localhost/`10.0.2.2` testing)
+- `VITE_STRIPE_PUBLISHABLE_KEY` (optional; do not use secret keys here)
+
+Server-only required variables:
+
 - `STRIPE_SECRET_KEY`
 - `STRIPE_WEBHOOK_SECRET`
 - `ADMIN_PASSWORD`
@@ -25,6 +32,8 @@ Required variables:
 Optional:
 
 - `PORT` (defaults to `5173`)
+- `ADMIN_COOKIE_SAMESITE` (use `none` in production for Android WebView admin cookies)
+- `CLIENT_ALLOWED_ORIGINS` / `MOBILE_ALLOWED_ORIGINS` (comma-separated HTTPS/native origins allowed to call the API with credentials)
 - `CRYPTO_PAYMENT_EXPIRATION_MINUTES` (defaults to `30`)
 - `CRYPTO_MODE=static_txid`
 - `CRYPTO_DESTINATION_PROVIDER=static_txid`
@@ -32,7 +41,7 @@ Optional:
 - `CRYPTO_BTC_STATIC_ADDRESS`
 - `CRYPTO_XMR_STATIC_ADDRESS`
 
-Use `.env.example` for key names only.
+Never prefix server secrets with `VITE_`; Vite exposes `VITE_*` values to the web and Android client bundle. Use `.env.example` for key names only. See `MOBILE.md` for Android build and Play Store release steps.
 
 ## Crypto Payments
 
@@ -47,8 +56,11 @@ See `docs/crypto-wallet-setup.md` for static TXID setup and optional wallet/moni
 ```bash
 npm install
 npm run dev
+npm run server
 npm run build
 npm run lint
+npm run android:sync
+npm run android:build
 ```
 
 ## PR Checklist

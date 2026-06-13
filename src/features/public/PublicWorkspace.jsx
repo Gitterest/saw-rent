@@ -17,16 +17,14 @@ import {
 } from "../../lib/contactSubmission"
 import {
   DONATION_METHODS,
-  PAYPAL_DONATION_URL,
   fetchDonationConfig,
   normalizeDonationConfig,
 } from "../../lib/donationConfig"
 
 const PUBLIC_MODULES = [
-  { key: "dispatch", label: "Chainsaws", icon: "SAWS", size: "wide", description: "Availability, rates, and saw details" },
+  { key: "dispatch", label: "Chainsaws", icon: "SAWS", size: "wide", description: "Saw photos and rental prices" },
   { key: "reservation", label: "Chainsaw Rentals", icon: "RENT", size: "tall", description: "Request rental dates and complete the deposit flow" },
   { key: "crypto", label: "Crypto Payment", icon: "CP", size: "standard", description: "BTC and XMR rental deposit instructions" },
-  { key: "donate", label: "Donate", icon: "GIVE", size: "standard", description: "Support Saw Rent with PayPal, BTC, or XMR" },
   { key: "briefing", label: "Pickup Notes", icon: "NOTES", size: "standard", description: "Process, pricing, and pickup instructions", side: "right" },
   { key: "about", label: "ABOUT US", icon: "SFC", size: "wide", description: "Saw Rent and SoFlipCo business details" },
   { key: "email", label: "EMAIL", icon: "MAIL", size: "wide", description: "Compose a message to Saw Rent", side: "right" },
@@ -69,11 +67,6 @@ function ContactActionLinks({ variant = "default" }) {
   )
 }
 
-function getDailyAverage(saws) {
-  if (saws.length === 0) return 0
-  return saws.reduce((sum, saw) => sum + Number(saw.dailyRateCents || 0), 0) / saws.length
-}
-
 function formatCryptoCountdown(seconds) {
   const safeSeconds = Math.max(0, Number(seconds || 0))
   const minutes = Math.floor(safeSeconds / 60)
@@ -98,126 +91,47 @@ function getCryptoQuoteTime(request) {
   return request?.cryptoRateQuotedAt || request?.cryptoAmountFiatSnapshot?.quotedAt || null
 }
 
-function PublicMetrics({ saws, availableSaws, paymentsEnabled }) {
+function SawCatalog({ saws }) {
   return (
-    <div className="metric-strip">
-      <article className="metric-panel">
-        <span>Chainsaws loaded</span>
-        <strong>{saws.length}</strong>
-        <p>Chainsaws ready for dispatch or review.</p>
-      </article>
-      <article className="metric-panel">
-        <span>Ready now</span>
-        <strong>{availableSaws.length}</strong>
-        <p>Units immediately requestable from the desk.</p>
-      </article>
-      <article className="metric-panel">
-        <span>Deposit mode</span>
-        <strong>{paymentsEnabled ? "Live" : "Desk"}</strong>
-        <p>{paymentsEnabled ? "Stripe deposit checkout is enabled." : "Deposits are handled manually at pickup."}</p>
-      </article>
-    </div>
-  )
-}
-
-function FleetBoard({ saws, availableSaws, selectedSaw, paymentsEnabled, onSelectSaw }) {
-  return (
-    <div className="window-stack">
-      <PublicMetrics saws={saws} availableSaws={availableSaws} paymentsEnabled={paymentsEnabled} />
-      <div className="sr-grid sr-grid--inventory">
-        <div className="panel-stack">
-          <div className="section-heading">
-            <div>
-              <p className="section-eyebrow">Inventory</p>
-              <h3>Chainsaw status</h3>
-            </div>
-            <span className="sr-badge tone-neutral">{availableSaws.length} available</span>
-          </div>
-
-          <div className="saw-catalog" aria-label="Chainsaw visual catalog">
-            {saws.map((saw) => {
-              const selected = selectedSaw?.id === saw.id
-              return (
-                <button
-                  key={saw.id}
-                  type="button"
-                  className={`saw-catalog-card ${selected ? "is-selected" : ""}`}
-                  onClick={() => onSelectSaw?.(saw.id)}
-                  aria-pressed={selected ? "true" : "false"}
-                >
-                  <span className="saw-catalog-card__image">
-                    <img src={getSawImageUrl(saw)} alt="" loading="lazy" />
-                  </span>
-                  <span className="saw-catalog-card__body">
-                    <span className="saw-catalog-card__topline">
-                      <strong>{saw.name}</strong>
-                      <span className={`status-pill tone-${getStatusTone(saw.status)}`}>
-                        {normalizeStatusLabel(saw.status)}
-                      </span>
-                    </span>
-                    <span className="saw-catalog-card__spec">{saw.category} | {saw.barSize} | {saw.engineCc ? `${saw.engineCc}cc` : "Engine N/A"}</span>
-                    <span className="saw-catalog-card__rate">{formatMoney(saw.dailyRateCents)} / day</span>
-                  </span>
-                </button>
-              )
-            })}
-          </div>
+    <div className="saw-showcase">
+      <div className="saw-showcase__heading">
+        <div>
+          <p className="section-eyebrow">SAWS</p>
+          <h3>Chainsaw catalog</h3>
         </div>
-
-        <div className="panel-stack">
-          <div className="section-heading">
-            <div>
-              <p className="section-eyebrow">Dispatch inspector</p>
-              <h3>{selectedSaw?.name || "No unit selected"}</h3>
-            </div>
-            <span className={`status-pill tone-${getStatusTone(selectedSaw?.status)}`}>
-              {normalizeStatusLabel(selectedSaw?.status)}
-            </span>
-          </div>
-
-          {selectedSaw ? (
-            <div className="inspector-card">
-              <img className="inspector-card__image" src={getSawImageUrl(selectedSaw)} alt="" />
-              <dl className="detail-list">
-                <div>
-                  <dt>Category</dt>
-                  <dd>{selectedSaw.category}</dd>
-                </div>
-                <div>
-                  <dt>Bar / engine</dt>
-                  <dd>{selectedSaw.barSize} / {selectedSaw.engineCc ? `${selectedSaw.engineCc}cc` : "N/A"}</dd>
-                </div>
-                <div>
-                  <dt>Daily rate</dt>
-                  <dd>{formatMoney(selectedSaw.dailyRateCents)}</dd>
-                </div>
-                <div>
-                  <dt>Deposit</dt>
-                  <dd>{formatMoney(selectedSaw.depositCents)}</dd>
-                </div>
-              </dl>
-              <p className="inspector-note">{selectedSaw.notes}</p>
-            </div>
-          ) : (
-            <div className="empty-panel">No available saw is currently selected.</div>
-          )}
-
-          <div className="metric-inline">
-            <div>
-              <span>Average daily rate</span>
-              <strong>{formatMoney(getDailyAverage(availableSaws))}</strong>
-            </div>
-            <div>
-              <span>Selection policy</span>
-              <strong>Available units only</strong>
-            </div>
-          </div>
-        </div>
+        <p>To reserve a saw, use the RENT app.</p>
       </div>
+
+      <div className="saw-catalog" aria-label="Available chainsaws">
+        {saws.map((saw) => (
+          <article key={saw.id} className="saw-catalog-card">
+            <div className="saw-catalog-card__image">
+              <img src={getSawImageUrl(saw)} alt={`${saw.brand} ${saw.model}`} loading="lazy" />
+            </div>
+            <div className="saw-catalog-card__body">
+              <div>
+                <span className="saw-catalog-card__brand">{saw.brand}</span>
+                <h4>{saw.model}</h4>
+              </div>
+              <div className="saw-catalog-card__specs">
+                <span>{saw.barSize}</span>
+                <span>{saw.type}</span>
+              </div>
+              <div className="saw-catalog-card__pricing">
+                <strong>{formatMoney(saw.dailyPrice)} / day</strong>
+                <span>{formatMoney(saw.deposit)} deposit</span>
+              </div>
+            </div>
+          </article>
+        ))}
+      </div>
+
+      {saws.length === 0 ? (
+        <div className="empty-panel">No chainsaws are listed right now.</div>
+      ) : null}
     </div>
   )
 }
-
 function ReservationDesk({
   availableSaws,
   form,
@@ -804,9 +718,6 @@ function AboutUsWindow() {
             <h3>Talk with Saw Rent</h3>
             <p className="section-detail">Call or text the rental desk for saw availability, pickup timing, payment questions, or SoFlipCo support.</p>
           </div>
-          <a className="button button-primary" href={PAYPAL_DONATION_URL} target="_blank" rel="noreferrer">
-            DONATE
-          </a>
         </div>
         <ContactActionLinks />
       </section>
@@ -814,10 +725,24 @@ function AboutUsWindow() {
   )
 }
 
-function DonationWindow() {
+function buildCryptoDonationUri(currency, address) {
+  if (!address) return ""
+  if (currency === "BTC") return `bitcoin:${address}`
+  if (currency === "XMR") return `monero:${address}`
+  return address
+}
+
+function getDonationLink(donationConfig, method) {
+  if (method.key === "paypal") return donationConfig.paypalUrl
+  if (method.key === "cashapp") return donationConfig.cashAppUrl
+  return method.url || ""
+}
+
+function DonationPanel({ onClose }) {
   const [donationConfig, setDonationConfig] = useState(() => normalizeDonationConfig())
   const [loadState, setLoadState] = useState("loading")
   const [copyNotice, setCopyNotice] = useState("")
+  const [qrImages, setQrImages] = useState({})
 
   useEffect(() => {
     let alive = true
@@ -839,6 +764,41 @@ function DonationWindow() {
     }
   }, [])
 
+  useEffect(() => {
+    let alive = true
+    const cryptoMethods = DONATION_METHODS.filter((method) => method.type === "crypto")
+
+    Promise.all(
+      cryptoMethods.map(async (method) => {
+        const address = donationConfig.crypto[method.key]?.address || ""
+        const qrData = buildCryptoDonationUri(method.key, address)
+        if (!qrData) return [method.key, ""]
+
+        try {
+          const image = await QRCode.toDataURL(qrData, {
+            margin: 1,
+            scale: 5,
+            color: {
+              dark: "#111315",
+              light: "#f3f5f7",
+            },
+          })
+          return [method.key, image]
+        } catch {
+          return [method.key, ""]
+        }
+      }),
+    ).then((entries) => {
+      if (alive) {
+        setQrImages(Object.fromEntries(entries))
+      }
+    })
+
+    return () => {
+      alive = false
+    }
+  }, [donationConfig])
+
   async function copyDonationAddress(currency) {
     const address = donationConfig.crypto[currency]?.address || ""
     if (!address) return
@@ -852,43 +812,59 @@ function DonationWindow() {
   }
 
   return (
-    <div className="donation-app">
-      <section className="donation-hero">
+    <aside className="donation-popover" role="dialog" aria-label="Donation options">
+      <section className="donation-popover__header">
         <div>
           <p className="section-eyebrow">Support Saw Rent</p>
-          <h3>DONATE</h3>
-          <p>Help keep local chainsaw rentals available across {LOCATION_LABEL}. PayPal, BTC, and XMR are supported when configured.</p>
+          <h3>Donations</h3>
+          <p>Pick a payment option and send support in a few taps.</p>
         </div>
-        <a className="button button-primary" href={donationConfig.paypalUrl} target="_blank" rel="noreferrer">
-          Donate with PayPal
-        </a>
+        <button type="button" className="button button-secondary donation-popover__close" onClick={onClose} aria-label="Close donations">
+          Close
+        </button>
       </section>
 
       {loadState === "error" ? (
-        <div className="notice-banner">Crypto donation addresses could not be loaded. PayPal is still available.</div>
+        <div className="notice-banner">Crypto donation addresses could not be loaded. PayPal and Cash App are still available.</div>
       ) : null}
       {copyNotice ? <div className="notice-banner">{copyNotice}</div> : null}
 
-      <section className="donation-method-grid" aria-label="Donation methods">
+      <section className="donation-quick-links" aria-label="Donation payment links">
         {DONATION_METHODS.map((method) => {
           if (method.type === "link") {
+            const href = getDonationLink(donationConfig, method)
             return (
-              <a key={method.key} className="donation-method-card" href={donationConfig.paypalUrl} target="_blank" rel="noreferrer">
+              <a key={method.key} className="donation-pay-link" href={href} target="_blank" rel="noreferrer">
                 <span>{method.label}</span>
-                <strong>PayPal donation</strong>
-                <small>{donationConfig.paypalUrl}</small>
+                <strong>Open {method.label}</strong>
+                <small>{href}</small>
               </a>
             )
           }
 
+          return null
+        })}
+      </section>
+
+      <section className="donation-method-grid" aria-label="Crypto donation methods">
+        {DONATION_METHODS.filter((method) => method.type === "crypto").map((method) => {
           const address = donationConfig.crypto[method.key]?.address || ""
           const source = donationConfig.crypto[method.key]?.source || ""
+          const donationUri = buildCryptoDonationUri(method.key, address)
 
           return (
             <article key={method.key} className="donation-method-card">
               <span>{method.label}</span>
-              <strong>{address ? "Crypto donation address" : "Address not configured"}</strong>
-              <code>{address || "Configure this receive address before accepting donations."}</code>
+              <strong>{address ? `${method.label} donation address` : "Address not configured"}</strong>
+              {address ? (
+                <a className="donation-wallet-link" href={donationUri}>
+                  Open wallet link
+                </a>
+              ) : null}
+              {qrImages[method.key] ? (
+                <img className="donation-qr" src={qrImages[method.key]} alt={`${method.label} donation QR code`} />
+              ) : null}
+              <code>{address || "Address not configured yet."}</code>
               {source ? <small>{normalizeStatusLabel(source)}</small> : null}
               <button
                 type="button"
@@ -902,7 +878,7 @@ function DonationWindow() {
           )
         })}
       </section>
-    </div>
+    </aside>
   )
 }
 
@@ -1083,6 +1059,7 @@ export function PublicWorkspace({
 }) {
   const [launcherOpen, setLauncherOpen] = useState(false)
   const [launcherQuery, setLauncherQuery] = useState("")
+  const [donationsOpen, setDonationsOpen] = useState(false)
   const {
     openWindows,
     minimizedWindows,
@@ -1103,11 +1080,19 @@ export function PublicWorkspace({
     definitions: PUBLIC_MODULES,
     defaultOpenKeys: DEFAULT_PUBLIC_WINDOWS,
     defaultActiveKey: "",
+    restoreFromUrl: true,
+    syncUrl: true,
+    urlParamName: "module",
   })
 
   function closeLauncher() {
     setLauncherOpen(false)
     setLauncherQuery("")
+  }
+
+  function toggleLauncher() {
+    setLauncherOpen((current) => !current)
+    setDonationsOpen(false)
   }
 
   function runWorkspaceAction(action) {
@@ -1128,7 +1113,7 @@ export function PublicWorkspace({
       key: "dispatch",
       icon: "SAWS",
       label: "Chainsaws",
-      description: "Availability, rates, and unit status",
+      description: "Saw photos and rental prices",
       group: "Apps",
       onSelect: () => {
         focusWindow("dispatch")
@@ -1154,17 +1139,6 @@ export function PublicWorkspace({
       group: "Apps",
       onSelect: () => {
         focusWindow("crypto")
-        closeLauncher()
-      },
-    },
-    {
-      key: "donate",
-      icon: "GIVE",
-      label: "Donate",
-      description: "Support Saw Rent with PayPal, BTC, or XMR",
-      group: "Apps",
-      onSelect: () => {
-        focusWindow("donate")
         closeLauncher()
       },
     },
@@ -1287,15 +1261,6 @@ export function PublicWorkspace({
       },
     },
     {
-      key: "donate-rail",
-      icon: "GIVE",
-      label: "Donate",
-      onSelect: () => {
-        focusWindow("donate")
-        closeLauncher()
-      },
-    },
-    {
       key: "about-rail",
       icon: "SFC",
       label: "ABOUT US",
@@ -1328,7 +1293,7 @@ export function PublicWorkspace({
       key: "dispatch",
       icon: "SAWS",
       label: "Chainsaws",
-      meta: `${availableSaws.length} ready`,
+      meta: `${availableSaws.length} available`,
       active: activeWindow === "dispatch",
       running: openWindows.includes("dispatch"),
       onSelect: () => focusWindow("dispatch"),
@@ -1359,15 +1324,6 @@ export function PublicWorkspace({
       active: activeWindow === "crypto",
       running: openWindows.includes("crypto"),
       onSelect: () => focusWindow("crypto"),
-    },
-    {
-      key: "donate",
-      icon: "GIVE",
-      label: "Donate",
-      meta: "PayPal / BTC / XMR",
-      active: activeWindow === "donate",
-      running: openWindows.includes("donate"),
-      onSelect: () => focusWindow("donate"),
     },
     {
       key: "about",
@@ -1415,8 +1371,20 @@ export function PublicWorkspace({
       launcherOpen={launcherOpen}
       launcherQuery={launcherQuery}
       onLauncherQueryChange={setLauncherQuery}
-      onToggleLauncher={() => setLauncherOpen((current) => !current)}
+      onToggleLauncher={toggleLauncher}
       taskbarItems={taskbarItems}
+      taskbarActions={[
+        {
+          key: "donations",
+          label: "Donations",
+          tone: "donation",
+          active: donationsOpen,
+          onSelect: () => {
+            setDonationsOpen((current) => !current)
+            closeLauncher()
+          },
+        },
+      ]}
       systemBadges={[
         { label: "Rent a chainsaw today!", tone: "success" },
         { label: "Crypto payment Optional", tone: "info" },
@@ -1431,7 +1399,7 @@ export function PublicWorkspace({
                 key="dispatch"
                 windowKey="dispatch"
                 title="Chainsaws"
-                subtitle="Availability, pricing, and selected unit details"
+                subtitle="Visual saw catalog and pricing"
                 icon="SAWS"
                 size="wide"
                 frame={windowState.frame}
@@ -1444,13 +1412,7 @@ export function PublicWorkspace({
                 onToggleMaximize={() => toggleMaximizeWindow("dispatch")}
                 onClose={() => closeWindow("dispatch")}
               >
-                <FleetBoard
-                  saws={saws}
-                  availableSaws={availableSaws}
-                  selectedSaw={selectedSaw}
-                  paymentsEnabled={paymentsEnabled}
-                  onSelectSaw={(sawId) => updateForm("sawId", sawId)}
-                />
+                <SawCatalog saws={saws} />
               </WindowSurface>
             )
           }
@@ -1551,30 +1513,6 @@ export function PublicWorkspace({
             )
           }
 
-          if (windowState.key === "donate") {
-            return (
-              <WindowSurface
-                key="donate"
-                windowKey="donate"
-                title="Donate"
-                subtitle="PayPal, BTC, and XMR support"
-                icon="GIVE"
-                size="standard"
-                frame={windowState.frame}
-                zIndex={windowState.zIndex}
-                active={windowState.active}
-                minimized={windowState.minimized}
-                onFocus={() => focusWindow("donate")}
-                onFrameChange={(nextFrame) => updateFrame("donate", nextFrame)}
-                onMinimize={() => minimizeWindow("donate")}
-                onToggleMaximize={() => toggleMaximizeWindow("donate")}
-                onClose={() => closeWindow("donate")}
-              >
-                <DonationWindow />
-              </WindowSurface>
-            )
-          }
-
           if (windowState.key === "email") {
             return (
               <WindowSurface
@@ -1628,6 +1566,7 @@ export function PublicWorkspace({
           )
         })}
       </div>
+      {donationsOpen ? <DonationPanel onClose={() => setDonationsOpen(false)} /> : null}
     </SawRentShell>
   )
 }

@@ -44,6 +44,7 @@ const DEFAULT_EXPIRATION_MINUTES = 30
 function paymentError(message, status = 409) {
   const error = new Error(message)
   error.status = status
+  error.expose = true
   return error
 }
 

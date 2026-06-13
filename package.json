@@ -7,12 +7,27 @@
     "dev": "node server/index.js",
     "build": "vite build --configLoader native",
     "lint": "eslint .",
+    "server": "node server/index.js",
+    "mobile:build": "npm run android:sync",
+    "mobile:sync": "npm run android:sync",
+    "mobile:android": "npm run android:sync && npx cap open android",
+    "android:sync": "npm run build && npx cap sync android",
+    "android:open": "npx cap open android",
+    "android:build": "npm run android:sync && node scripts/gradle.mjs assembleDebug",
+    "android:release": "npm run android:sync && node scripts/gradle.mjs bundleRelease",
     "test": "node tests/node.test.js",
     "test:smoke": "playwright test",
     "preview": "vite preview",
     "start": "node server/index.js"
   },
   "dependencies": {
+    "@capacitor/android": "^8.3.1",
+    "@capacitor/app": "^8.1.0",
+    "@capacitor/cli": "^8.3.1",
+    "@capacitor/core": "^8.3.1",
+    "@capacitor/network": "^8.0.1",
+    "@capacitor/splash-screen": "^8.0.1",
+    "@capacitor/status-bar": "^8.0.2",
     "@stripe/stripe-js": "^8.4.0",
     "cookie-parser": "^1.4.7",
     "dotenv": "^16.6.1",
@@ -32,6 +47,7 @@
     "eslint-plugin-react-hooks": "^7.0.1",
     "eslint-plugin-react-refresh": "^0.5.2",
     "globals": "^17.4.0",
+    "typescript": "^6.0.3",
     "vite": "^8.0.1"
   }
 }

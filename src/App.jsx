@@ -3,6 +3,7 @@ import { useEffect, useMemo, useState } from "react"
 import { api } from "./api"
 import { AdminWorkspace } from "./features/admin/AdminWorkspace"
 import { PublicWorkspace } from "./features/public/PublicWorkspace"
+import { getPublicAppOrigin, isNativePlatform } from "./runtimeConfig"
 import "./styles/app-shell.css"
 import "./App.css"
 
@@ -50,17 +51,32 @@ function normalizeSettings(value) {
 
 function normalizeSaw(entry, index) {
   const saw = entry && typeof entry === "object" ? entry : {}
+  const fallbackName = toSafeString(saw.name, `Saw ${index + 1}`)
+  const [fallbackBrand = "Saw", ...modelParts] = fallbackName.split(" ")
+  const brand = toSafeString(saw.brand, fallbackBrand)
+  const model = toSafeString(saw.model, modelParts.join(" ") || fallbackName)
+  const type = toSafeString(saw.type || saw.category, "General")
+  const image = toSafeString(saw.image || saw.imageUrl)
+  const dailyPrice = Number(saw.dailyPrice || saw.dailyRateCents || 0)
+  const deposit = Number(saw.deposit || saw.depositCents || 0)
+
   return {
     id: toSafeString(saw.id, `saw-${index}`),
-    name: toSafeString(saw.name, "Unlisted saw"),
-    category: toSafeString(saw.category, "General"),
+    name: toSafeString(saw.name, `${brand} ${model}`.trim() || "Unlisted saw"),
+    brand,
+    model,
+    category: type,
+    type,
     barSize: toSafeString(saw.barSize, "N/A"),
     engineCc: Number.isFinite(Number(saw.engineCc)) ? Number(saw.engineCc) : null,
-    dailyRateCents: Number(saw.dailyRateCents || 0),
-    depositCents: Number(saw.depositCents || 0),
+    dailyRateCents: dailyPrice,
+    dailyPrice,
+    depositCents: deposit,
+    deposit,
     status: normalizeStatusValue(saw.status),
     notes: toSafeString(saw.notes, "No additional notes."),
-    imageUrl: toSafeString(saw.imageUrl),
+    image,
+    imageUrl: image,
   }
 }
 
@@ -89,7 +105,46 @@ function normalizeDashboard(payload) {
 
 function App() {
   const isAdmin = window.location.pathname.startsWith("/admin")
-  return isAdmin ? <AdminApp /> : <PublicApp />
+  return (
+    <>
+      <NetworkStatusBanner />
+      {isAdmin ? <AdminApp /> : <PublicApp />}
+    </>
+  )
+}
+
+function NetworkStatusBanner() {
+  const [networkStatus, setNetworkStatus] = useState(null)
+
+  useEffect(() => {
+    function handleNetworkStatus(event) {
+      setNetworkStatus(event.detail || null)
+    }
+    function handleOnline() {
+      setNetworkStatus({ connected: true })
+    }
+    function handleOffline() {
+      setNetworkStatus({ connected: false })
+    }
+
+    window.addEventListener("sawrent:network-status", handleNetworkStatus)
+    window.addEventListener("online", handleOnline)
+    window.addEventListener("offline", handleOffline)
+
+    return () => {
+      window.removeEventListener("sawrent:network-status", handleNetworkStatus)
+      window.removeEventListener("online", handleOnline)
+      window.removeEventListener("offline", handleOffline)
+    }
+  }, [])
+
+  if (!isNativePlatform() || networkStatus?.connected !== false) return null
+
+  return (
+    <div className="native-network-banner" role="status">
+      Saw Rent is offline. Reconnect to load inventory, requests, checkout, and admin data.
+    </div>
+  )
 }
 
 function PublicApp() {
@@ -238,7 +293,7 @@ function PublicApp() {
     try {
       const checkoutPayload = await api.createCheckoutSession({
         requestId: submittedRequest.id,
-        origin: window.location.origin,
+        origin: getPublicAppOrigin(),
       })
 
       const sessionUrl = toSafeString(

@@ -3,6 +3,7 @@ import crypto from "node:crypto"
 function destinationError(message, status = 503) {
   const error = new Error(message)
   error.status = status
+  error.expose = true
   return error
 }
 
